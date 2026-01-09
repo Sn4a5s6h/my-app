@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}النظام المحاسبي{% endblock %}</title>
+    
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <!-- Logo -->
+                    <div class="sidebar-header text-center py-3">
+                        <a href="{{ url_for('dashboard') }}" class="navbar-brand text-white">
+                            <i class="fas fa-calculator fa-2x"></i>
+                            <h4 class="mt-2">النظام المحاسبي</h4>
+                        </a>
+                    </div>
+                    
+                    <!-- Menu -->
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" 
+                               href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-home"></i>
+                                لوحة التحكم
+                            </a>
+                        </li>
+                        
+                        <!-- الحسابات -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'accounts_page' %}active{% endif %}" 
+                               href="{{ url_for('accounts_page') }}">
+                                <i class="fas fa-book"></i>
+                                الحسابات
+                            </a>
+                        </li>
+                        
+                        <!-- الفواتير -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                الفواتير
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('invoices_page') }}">
+                                        <i class="fas fa-list"></i>
+                                        جميع الفواتير
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('invoices_page') }}?type=sales">
+                                        <i class="fas fa-arrow-up"></i>
+                                        فواتير المبيعات
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('invoices_page') }}?type=purchase">
+                                        <i class="fas fa-arrow-down"></i>
+                                        فواتير المشتريات
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                        <!-- العملاء والموردين -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                                <i class="fas fa-users"></i>
+                                العملاء والموردين
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('customers_page') }}">
+                                        <i class="fas fa-user-friends"></i>
+                                        العملاء
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('suppliers_page') }}">
+                                        <i class="fas fa-truck"></i>
+                                        الموردين
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        
+                        <!-- المنتجات -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'products_page' %}active{% endif %}" 
+                               href="{{ url_for('products_page') }}">
+                                <i class="fas fa-boxes"></i>
+                                المنتجات
+                            </a>
+                        </li>
+                        
+                        <!-- القيود اليومية -->
+                        {% if current_user.role in ['admin', 'accountant'] %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'journal_page' %}active{% endif %}" 
+                               href="{{ url_for('journal_page') }}">
+                                <i class="fas fa-journal-whills"></i>
+                                القيود اليومية
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        <!-- السندات -->
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'payments_page' %}active{% endif %}" 
+                               href="{{ url_for('payments_page') }}">
+                                <i class="fas fa-receipt"></i>
+                                السندات
+                            </a>
+                        </li>
+                        
+                        <!-- التقارير -->
+                        {% if current_user.role in ['admin', 'accountant', 'auditor'] %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'reports_page' %}active{% endif %}" 
+                               href="{{ url_for('reports_page') }}">
+                                <i class="fas fa-chart-bar"></i>
+                                التقارير
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        <!-- الإعدادات -->
+                        {% if current_user.role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'settings_page' %}active{% endif %}" 
+                               href="{{ url_for('settings_page') }}">
+                                <i class="fas fa-cog"></i>
+                                الإعدادات
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                    
+                    <!-- User Info -->
+                    <div class="position-absolute bottom-0 start-0 end-0 p-3 border-top">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-user-circle fa-2x text-light"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 text-white user-name">{{ current_user.full_name }}</h6>
+                                <small class="text-muted user-role">{{ current_user.role }}</small>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <a href="{{ url_for('logout') }}" class="text-danger" title="تسجيل الخروج">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Top Navbar -->
+                <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
+                    <div class="container-fluid">
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#sidebar" aria-controls="sidebar" aria-expanded="false">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        
+                        <h1 class="h3 mb-0">{% block page_title %}{% endblock %}</h1>
+                        
+                        <div class="d-flex">
+                            {% block actions %}{% endblock %}
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-primary me-2">
+                                <i class="fas fa-user"></i>
+                                الملف الشخصي
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+                
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="mt-3">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <!-- Page Content -->
+                <div class="container-fluid py-4">
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة التحكم - النظام المحاسبي{% endblock %}
+{% block page_title %}لوحة التحكم{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Quick Stats -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            الرصيد النقدي
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="cash-balance">
+                            {{ "%.2f"|format(cash_balance) }} ر.س
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-money-bill-wave fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+			                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            فواتير مستحقة
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="overdue-invoices">
+                            {{ pending_invoices }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file-invoice-dollar fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            العملاء
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-customers">
+                            {{ total_customers }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            منتجات منخفضة
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="low-stock">
+                            {{ low_stock_items }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-box fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Charts -->
+    <div class="col-xl-8 col-lg-7">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">تطور المبيعات والمشتريات</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-4 col-lg-5">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">توزيع الحسابات</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="accountsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Transactions -->
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">أحدث الحركات المالية</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="transactionsTable" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>رقم الحركة</th>
+                                <th>الوصف</th>
+                                <th>الحساب</th>
+                                <th>نوع الحركة</th>
+                                <th>المبلغ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in recent_transactions %}
+                            <tr>
+                                <td>{{ transaction.transaction_date.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ transaction.transaction_number }}</td>
+                                <td>{{ transaction.description }}</td>
+                                <td>{{ transaction.account.name }}</td>
+                                <td>
+                                    <span class="badge {% if transaction.transaction_type == 'debit' %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ transaction.transaction_type }}
+                                    </span>
+                                </td>
+                                <td>{{ "%.2f"|format(transaction.amount) }} ر.س</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">إجراءات سريعة</h6>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('invoices_page') }}?type=sales" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
+                            إنشاء فاتورة مبيعات
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('customers_page') }}" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-user-plus fa-2x mb-2"></i><br>
+                            إضافة عميل جديد
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('payments_page') }}" class="btn btn-info btn-lg w-100">
+                            <i class="fas fa-receipt fa-2x mb-2"></i><br>
+                            إنشاء سند قبض
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('reports_page') }}" class="btn btn-warning btn-lg w-100">
+                            <i class="fas fa-chart-bar fa-2x mb-2"></i><br>
+                            عرض التقارير
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // تحميل إحصائيات محدثة
+    loadDashboardStats();
+    loadChartData();
+
+    // تهيئة جدول الحركات
+    $('#transactionsTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
+        },
+        pageLength: 10,
+        order: [[0, 'desc']]
+    });
+});
+
+function loadDashboardStats() {
+    $.ajax({
+        url: '/api/dashboard/stats',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                const stats = response.data;
+                $('#monthly-sales').text(formatCurrency(stats.monthly_sales));
+                $('#monthly-purchases').text(formatCurrency(stats.monthly_purchases));
+                $('#cash-balance').text(formatCurrency(stats.cash_balance));
+                $('#overdue-invoices').text(stats.overdue_invoices);
+                $('#total-customers').text(stats.total_customers || {{ total_customers }});
+                $('#low-stock').text(stats.low_stock_items);
+                $('#new-customers').text(stats.new_customers);
+            }
+        },
+        error: function() {
+            console.error('Failed to load dashboard stats');
+        }
+    });
+}
+
+function loadChartData() {
+    $.ajax({
+        url: '/api/dashboard/chart-data',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                renderSalesChart(response.data.monthly_trend);
+                renderAccountsChart(response.data.account_balances);
+            }
+        },
+        error: function() {
+            console.error('Failed to load chart data');
+        }
+    });
+}
+
+function renderSalesChart(monthlyData) {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    const labels = monthlyData.map(item => item.month);
+    const salesData = monthlyData.map(item => item.sales);
+    const purchasesData = monthlyData.map(item => item.purchases);
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'المبيعات',
+                    data: salesData,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                },
+                {
+                    label: 'المشتريات',
+                    data: purchasesData,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    rtl: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatCurrency(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderAccountsChart(accountBalances) {
+    const ctx = document.getElementById('accountsChart').getContext('2d');
+
+    const labels = ['الأصول', 'الخصوم', 'حقوق الملكية', 'الإيرادات', 'المصروفات'];
+    const data = [
+        accountBalances.asset || 0,
+        accountBalances.liability || 0,
+        accountBalances.equity || 0,
+        accountBalances.revenue || 0,
+        accountBalances.expense || 0
+    ];
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(255, 205, 86, 0.8)',
+                    'rgba(153, 102, 255, 0.8)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'left',
+                    rtl: true
+                }
+            }
+        }
+    });
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('ar-SA', {
+        style: 'currency',
+        currency: 'SAR',
+        minimumFractionDigits: 2
+    }).format(amount);
+}
+
+// تحديث البيانات كل 5 دقائق
+setInterval(function() {
+    loadDashboardStats();
+}, 300000);
+</script>
+{% endblock %}
