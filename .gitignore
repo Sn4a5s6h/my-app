@@ -7,3 +7,13 @@ instance/
 *.db
 uploads/
 static/exports/
+echo "__pycache__/" >> .gitignore
+echo "*.pyc" >> .gitignore
+echo "*.pyo" >> .gitignore
+echo "*.pyd" >> .gitignore
+echo "venv/" >> .gitignore
+echo "database/" >> .gitignore
+echo "*.db" >> .gitignore
+echo "*.env" >> .gitignore
+echo "uploads/" >> .gitignore
+echo "static/exports/" >> .gitignore
