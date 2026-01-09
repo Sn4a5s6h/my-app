@@ -1,16 +1,30 @@
+# إطار العمل
 Flask==2.3.3
 gunicorn==20.1.0
-Jinja2==3.1.2
-Werkzeug==2.3.7
-click==8.2.1
-itsdangerous==2.1.2
-MarkupSafe==2.1.3
-requests==2.31.0
+
+# قاعدة البيانات
+SQLAlchemy==2.0.22
+psycopg2-binary==2.9.9  # إذا كنت تستخدم PostgreSQL
+pymysql==1.1.0           # إذا كنت تستخدم MySQL
+
+# التعامل مع البيانات
+pandas==2.1.1
+numpy==1.26.4
+openpyxl==3.1.2
+xlrd==2.0.1
+python-dateutil==2.8.2
+
+# إدارة البيئة والمتغيرات
 python-dotenv==1.0.0
 
-SQLAlchemy==2.0.22       # ORM للتعامل مع قواعد البيانات
-psycopg2-binary==2.9.9  # لو تستخدم PostgreSQL
-mysqlclient==2.2.1       # لو تستخدم MySQL
-pandas==2.1.1            # تحليل ملفات CSV و Excel
-openpyxl==3.1.2          # قراءة/كتابة ملفات Excel
-python-dateutil==2.8.2   # التعامل مع التواريخ والأوقات
+# طلبات HTTP
+requests==2.31.0
+
+# أدوات مساعدة
+werkzeug==2.3.6
+jinja2==3.1.2
+markupsafe==2.1.3
+itsdangerous==2.1.2
+
+# إذا كنت تستخدم عمليات جدولية أو تنسيقات إضافية
+tabulate==0.9.0
