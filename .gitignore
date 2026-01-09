@@ -17,3 +17,4 @@ echo "*.db" >> .gitignore
 echo "*.env" >> .gitignore
 echo "uploads/" >> .gitignore
 echo "static/exports/" >> .gitignore
+venv/
