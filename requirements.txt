@@ -1,10 +1,19 @@
+# إطار العمل
 Flask==2.3.3
 gunicorn==20.1.0
+
+# قاعدة البيانات
 SQLAlchemy==2.0.22
 psycopg2-binary==2.9.9
+
+# معالجة البيانات
 numpy==1.25.2
 pandas==2.1.1
 openpyxl==3.1.2
 python-dateutil==2.8.2
+
+# ملفات البيئة والمتغيرات
 python-dotenv==1.0.0
+
+# طلبات HTTP
 requests==2.31.0
