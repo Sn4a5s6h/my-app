@@ -17,7 +17,7 @@ python-dateutil==2.8.2
 
 # إنشاء ملفات PDF وتقارير
 reportlab==4.4.7
-arabic-reshaper==5.3.1
+arabic-reshaper==3.0.0
 python-bidi==0.4.2
 
 # ملفات البيئة والمتغيرات
