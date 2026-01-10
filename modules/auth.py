@@ -212,3 +212,13 @@ def get_current_user_id():
 
 def get_current_user_role():
     return current_user.role if current_user.is_authenticated else None
+def require_accountant():
+    """فرض صلاحية المحاسب"""
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    if current_user.role not in ['admin', 'accountant']:
+        flash('غير مصرح لك بالوصول لهذه الصفحة', 'error')
+        return redirect(url_for('main.dashboard'))
+
+    return True
