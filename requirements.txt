@@ -1,6 +1,9 @@
 # إطار العمل
 Flask==2.3.3
-gunicorn==20.1.0
+Flask-Login==0.6.3
+Flask-Cors==3.1.1
+Flask-Migrate==4.0.5
+Werkzeug==2.3.7
 
 # قاعدة البيانات
 SQLAlchemy==2.0.22
@@ -11,6 +14,11 @@ numpy==1.25.2
 pandas==2.1.1
 openpyxl==3.1.2
 python-dateutil==2.8.2
+
+# إنشاء ملفات PDF وتقارير
+reportlab==4.1.7
+arabic-reshaper==5.3.1
+python-bidi==0.4.2
 
 # ملفات البيئة والمتغيرات
 python-dotenv==1.0.0
