@@ -5,236 +5,365 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}النظام المحاسبي{% endblock %}</title>
     
-    <!-- CSS Libraries -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    
+    <!-- Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
-    {% block extra_css %}{% endblock %}
-</head>
-<body>
-    <!-- Loading Overlay -->
-    <div id="loading-overlay" style="display: none;">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">جاري التحميل...</span>
-        </div>
-    </div>
-
-    <!-- Main Container -->
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
-                <div class="position-sticky pt-3">
-                    <!-- Logo -->
-                    <div class="sidebar-header text-center py-3">
-                        <a href="{{ url_for('dashboard') }}" class="navbar-brand text-white">
-                            <i class="fas fa-calculator fa-2x"></i>
-                            <h4 class="mt-2">النظام المحاسبي</h4>
-                        </a>
-                    </div>
-                    
-                    <!-- Menu -->
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" 
-                               href="{{ url_for('dashboard') }}">
-                                <i class="fas fa-home"></i>
-                                لوحة التحكم
-                            </a>
-                        </li>
-                        
-                        <!-- الحسابات -->
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'accounts_page' %}active{% endif %}" 
-                               href="{{ url_for('accounts_page') }}">
-                                <i class="fas fa-book"></i>
-                                الحسابات
-                            </a>
-                        </li>
-                        
-                        <!-- الفواتير -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="fas fa-file-invoice-dollar"></i>
-                                الفواتير
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('invoices_page') }}">
-                                        <i class="fas fa-list"></i>
-                                        جميع الفواتير
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('invoices_page') }}?type=sales">
-                                        <i class="fas fa-arrow-up"></i>
-                                        فواتير المبيعات
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('invoices_page') }}?type=purchase">
-                                        <i class="fas fa-arrow-down"></i>
-                                        فواتير المشتريات
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        
-                        <!-- العملاء والموردين -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                <i class="fas fa-users"></i>
-                                العملاء والموردين
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('customers_page') }}">
-                                        <i class="fas fa-user-friends"></i>
-                                        العملاء
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('suppliers_page') }}">
-                                        <i class="fas fa-truck"></i>
-                                        الموردين
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        
-                        <!-- المنتجات -->
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'products_page' %}active{% endif %}" 
-                               href="{{ url_for('products_page') }}">
-                                <i class="fas fa-boxes"></i>
-                                المنتجات
-                            </a>
-                        </li>
-                        
-                        <!-- القيود اليومية -->
-                        {% if current_user.role in ['admin', 'accountant'] %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'journal_page' %}active{% endif %}" 
-                               href="{{ url_for('journal_page') }}">
-                                <i class="fas fa-journal-whills"></i>
-                                القيود اليومية
-                            </a>
-                        </li>
-                        {% endif %}
-                        
-                        <!-- السندات -->
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'payments_page' %}active{% endif %}" 
-                               href="{{ url_for('payments_page') }}">
-                                <i class="fas fa-receipt"></i>
-                                السندات
-                            </a>
-                        </li>
-                        
-                        <!-- التقارير -->
-                        {% if current_user.role in ['admin', 'accountant', 'auditor'] %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'reports_page' %}active{% endif %}" 
-                               href="{{ url_for('reports_page') }}">
-                                <i class="fas fa-chart-bar"></i>
-                                التقارير
-                            </a>
-                        </li>
-                        {% endif %}
-                        
-                        <!-- الإعدادات -->
-                        {% if current_user.role == 'admin' %}
-                        <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'settings_page' %}active{% endif %}" 
-                               href="{{ url_for('settings_page') }}">
-                                <i class="fas fa-cog"></i>
-                                الإعدادات
-                            </a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                    
-                    <!-- User Info -->
-                    <div class="position-absolute bottom-0 start-0 end-0 p-3 border-top">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <i class="fas fa-user-circle fa-2x text-light"></i>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-0 text-white user-name">{{ current_user.full_name }}</h6>
-                                <small class="text-muted user-role">{{ current_user.role }}</small>
-                            </div>
-                            <div class="flex-shrink-0">
-                                <a href="{{ url_for('logout') }}" class="text-danger" title="تسجيل الخروج">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #17a2b8;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Cairo', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary) 0%, #1a252f 100%);
+            color: white;
+            min-height: 100vh;
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-header .logo i {
+            font-size: 2rem;
+            color: var(--secondary);
+        }
+        
+        .sidebar-header .logo h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            border-right: 3px solid transparent;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-menu .nav-link:hover,
+        .sidebar-menu .nav-link.active {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            border-right: 3px solid var(--secondary);
+        }
+        
+        .sidebar-menu .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-info .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .user-info .details {
+            flex: 1;
+        }
+        
+        .user-info .details .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .user-info .details .role {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-right: 250px;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+        
+        .top-navbar {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .page-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin: 0;
+        }
+        
+        .content-wrapper {
+            padding: 20px;
+        }
+        
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .card-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        /* Button Styles */
+        .btn {
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #2980b9 100%);
+            border: none;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #219653 100%);
+            border: none;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #c0392b 100%);
+            border: none;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #e67e22 100%);
+            border: none;
+        }
+        
+        /* Table Styles */
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: var(--primary);
+            background-color: #f8f9fa;
+            border-top: none;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: #f5f7fa;
+        }
+        
+        /* Badge Styles */
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        /* Form Styles */
+        .form-control, .form-select {
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        /* Alert Styles */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            padding: 15px 20px;
+        }
+        
+        /* Stats Cards */
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border-left: 4px solid var(--secondary);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .stat-card h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            color: #666;
+            margin: 0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-right: -250px;
+            }
             
-            <!-- Main Content -->
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <!-- Top Navbar -->
-                <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
-                    <div class="container-fluid">
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
-                                data-bs-target="#sidebar" aria-controls="sidebar" aria-expanded="false">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        
-                        <h1 class="h3 mb-0">{% block page_title %}{% endblock %}</h1>
-                        
-                        <div class="d-flex">
-                            {% block actions %}{% endblock %}
-                            <a href="{{ url_for('profile') }}" class="btn btn-outline-primary me-2">
-                                <i class="fas fa-user"></i>
-                                الملف الشخصي
-                            </a>
-                        </div>
-                    </div>
-                </nav>
-                
-                <!-- Flash Messages -->
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        <div class="mt-3">
-                            {% for category, message in messages %}
-                                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                {% endwith %}
-                
-                <!-- Page Content -->
-                <div class="container-fluid py-4">
-                    {% block content %}{% endblock %}
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
-    
-    <!-- Custom JavaScript -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    
-    {% block extra_js %}{% endblock %}
-</body>
-</html>
+            .sidebar.show {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-right: 0;
+            }
+            
+            .top-navbar .sidebar-toggle {
+                display: block;
+            }
+            
+            .stat-card {
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            .sidebar, .top-navbar, .btn {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin: 0 !important;
+            }
+            
+            .card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #bdc3c7;
+            border-radius: 4px;
+        }
+        
+        ::

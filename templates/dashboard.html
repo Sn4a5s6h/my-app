@@ -1,297 +1,578 @@
 {% extends "base.html" %}
 
-{% block title %}لوحة التحكم - النظام المحاسبي{% endblock %}
-{% block page_title %}لوحة التحكم{% endblock %}
-
-{% block extra_css %}
-<style>
-    .stat-card {
-        transition: transform 0.3s;
-    }
-    .stat-card:hover {
-        transform: translateY(-5px);
-    }
-    .chart-container {
-        position: relative;
-        height: 300px;
-        width: 100%;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="row">
-    <!-- Quick Stats -->
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            الرصيد النقدي
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="cash-balance">
-                            {{ "%.2f"|format(cash_balance) }} ر.س
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-money-bill-wave fa-2x text-primary"></i>
+<div class="container-fluid">
+    <div class="row">
+        <!-- الشريط الجانبي -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-dark sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="sidebar-header text-center py-3">
+                    <h4 class="text-white">النظام المحاسبي</h4>
+                </div>
+                
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('dashboard') }}">
+                            🏠 لوحة التحكم
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="loadAccounts()">
+                            📒 الحسابات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-			                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            فواتير مستحقة
+            
+            <!-- الرسوم البيانية -->
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">📈 أداء الشهر الحالي</h5>
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="overdue-invoices">
-                            {{ pending_invoices }}
+                        <div class="card-body">
+                            <div id="monthlyChart" style="height: 300px;">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-file-invoice-dollar fa-2x text-success"></i>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">📊 توزيع الحسابات</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="accountsChart" style="height: 300px;">
+                                <canvas id="accountsDistributionChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            العملاء
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-customers">
-                            {{ total_customers }}
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-users fa-2x text-info"></i>
+            
+            <!-- الفواتير المستحقة -->
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">⏰ الفواتير المستحقة</h5>
+                    <span class="badge bg-danger" id="dueInvoicesCount">0</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="dueInvoicesTable">
+                            <thead>
+                                <tr>
+                                    <th>رقم الفاتورة</th>
+                                    <th>العميل</th>
+                                    <th>المبلغ</th>
+                                    <th>تاريخ الاستحقاق</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- سيتم تعبئتها بالجافاسكريبت -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card stat-card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            منتجات منخفضة
+            
+            <!-- التنبيهات والإشعارات -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">🔔 التنبيهات</h5>
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="low-stock">
-                            {{ low_stock_items }}
+                        <div class="card-body">
+                            <div class="list-group" id="alertsList">
+                                <!-- سيتم تعبئتها بالجافاسكريبت -->
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-box fa-2x text-warning"></i>
                     </div>
                 </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">📋 المهام القادمة</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group" id="tasksList">
+                                <!-- سيتم تعبئتها بالجافاسكريبت -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- مودال إضافة حركة -->
+<div class="modal fade" id="addTransactionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">➕ إضافة حركة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="transactionForm">
+                    <div class="mb-3">
+                        <label class="form-label">التاريخ</label>
+                        <input type="date" class="form-control" id="transactionDate" required 
+                               value="{{ date.today().strftime('%Y-%m-%d') }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <input type="text" class="form-control" id="transactionDescription" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الحساب</label>
+                        <select class="form-control" id="transactionAccount" required>
+                            <option value="">اختر الحساب</option>
+                            <!-- سيتم تعبئتها بالجافاسكريبت -->
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">المدين</label>
+                                <input type="number" class="form-control" id="transactionDebit" 
+                                       step="0.01" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الدائن</label>
+                                <input type="number" class="form-control" id="transactionCredit" 
+                                       step="0.01" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveTransaction()">حفظ</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <!-- Charts -->
-    <div class="col-xl-8 col-lg-7">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">تطور المبيعات والمشتريات</h6>
+<!-- مودال إضافة عميل -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">👥 إضافة عميل جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="salesChart"></canvas>
-                </div>
+            <div class="modal-body">
+                <form id="customerForm">
+                    <div class="mb-3">
+                        <label class="form-label">كود العميل</label>
+                        <input type="text" class="form-control" id="customerCode" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">اسم العميل</label>
+                        <input type="text" class="form-control" id="customerName" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الهاتف</label>
+                        <input type="tel" class="form-control" id="customerPhone">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">البريد الإلكتروني</label>
+                        <input type="email" class="form-control" id="customerEmail">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الرصيد الافتتاحي</label>
+                        <input type="number" class="form-control" id="customerBalance" 
+                               step="0.01" value="0">
+                    </div>
+                </form>
             </div>
-        </div>
-    </div>
-
-    <div class="col-xl-4 col-lg-5">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">توزيع الحسابات</h6>
-            </div>
-            <div class="card-body">
-                <div class="chart-container">
-                    <canvas id="accountsChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <!-- Recent Transactions -->
-    <div class="col-lg-12">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">أحدث الحركات المالية</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="transactionsTable" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>التاريخ</th>
-                                <th>رقم الحركة</th>
-                                <th>الوصف</th>
-                                <th>الحساب</th>
-                                <th>نوع الحركة</th>
-                                <th>المبلغ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for transaction in recent_transactions %}
-                            <tr>
-                                <td>{{ transaction.transaction_date.strftime('%Y-%m-%d') }}</td>
-                                <td>{{ transaction.transaction_number }}</td>
-                                <td>{{ transaction.description }}</td>
-                                <td>{{ transaction.account.name }}</td>
-                                <td>
-                                    <span class="badge {% if transaction.transaction_type == 'debit' %}bg-success{% else %}bg-danger{% endif %}">
-                                        {{ transaction.transaction_type }}
-                                    </span>
-                                </td>
-                                <td>{{ "%.2f"|format(transaction.amount) }} ر.س</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="saveCustomer()">حفظ</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Quick Actions -->
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">إجراءات سريعة</h6>
+<!-- مودال التقارير -->
+<div class="modal fade" id="reportsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">📊 التقارير المالية</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="card-body text-center">
+            <div class="modal-body">
                 <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('invoices_page') }}?type=sales" class="btn btn-primary btn-lg w-100">
-                            <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
-                            إنشاء فاتورة مبيعات
-                        </a>
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5>💰 الميزانية العمومية</h5>
+                                <p>عرض الموقف المالي الحالي</p>
+                                <button class="btn btn-outline-primary" onclick="generateBalanceSheet()">
+                                    عرض التقرير
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('customers_page') }}" class="btn btn-success btn-lg w-100">
-                            <i class="fas fa-user-plus fa-2x mb-2"></i><br>
-                            إضافة عميل جديد
-                        </a>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5>📈 قائمة الدخل</h5>
+                                <p>الإيرادات والمصروفات</p>
+                                <button class="btn btn-outline-success" onclick="generateIncomeStatement()">
+                                    عرض التقرير
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('payments_page') }}" class="btn btn-info btn-lg w-100">
-                            <i class="fas fa-receipt fa-2x mb-2"></i><br>
-                            إنشاء سند قبض
-                        </a>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5>⚖️ ميزان المراجعة</h5>
+                                <p>مراجعة الحسابات</p>
+                                <button class="btn btn-outline-warning" onclick="generateTrialBalance()">
+                                    عرض التقرير
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('reports_page') }}" class="btn btn-warning btn-lg w-100">
-                            <i class="fas fa-chart-bar fa-2x mb-2"></i><br>
-                            عرض التقارير
-                        </a>
+                    
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h5>👥 كشف حساب العميل</h5>
+                                <p>حركات عميل معين</p>
+                                <button class="btn btn-outline-info" onclick="generateCustomerStatement()">
+                                    عرض التقرير
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                
+                <div id="reportResult" class="mt-3" style="display: none;">
+                    <!-- سيتم عرض نتيجة التقرير هنا -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-$(document).ready(function() {
-    // تحميل إحصائيات محدثة
-    loadDashboardStats();
-    loadChartData();
+// متغيرات عامة
+let accounts = [];
+let customers = [];
+let monthlyData = [];
 
-    // تهيئة جدول الحركات
-    $('#transactionsTable').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/ar.json'
-        },
-        pageLength: 10,
-        order: [[0, 'desc']]
-    });
+// تحميل البيانات عند بدء الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    loadAccounts();
+    loadCustomers();
+    loadDashboardStats();
+    loadMonthlyData();
+    loadDueInvoices();
+    loadAlerts();
+    loadTasks();
 });
 
-function loadDashboardStats() {
-    $.ajax({
-        url: '/api/dashboard/stats',
-        method: 'GET',
-        success: function(response) {
-            if (response.success) {
-                const stats = response.data;
-                $('#monthly-sales').text(formatCurrency(stats.monthly_sales));
-                $('#monthly-purchases').text(formatCurrency(stats.monthly_purchases));
-                $('#cash-balance').text(formatCurrency(stats.cash_balance));
-                $('#overdue-invoices').text(stats.overdue_invoices);
-                $('#total-customers').text(stats.total_customers || {{ total_customers }});
-                $('#low-stock').text(stats.low_stock_items);
-                $('#new-customers').text(stats.new_customers);
-            }
-        },
-        error: function() {
-            console.error('Failed to load dashboard stats');
+// تحميل الحسابات
+async function loadAccounts() {
+    try {
+        const response = await fetch('/api/accounts');
+        accounts = await response.json();
+        
+        // تعبئة قائمة الحسابات في المودال
+        const accountSelect = document.getElementById('transactionAccount');
+        accountSelect.innerHTML = '<option value="">اختر الحساب</option>';
+        
+        accounts.forEach(account => {
+            const option = document.createElement('option');
+            option.value = account.id;
+            option.textContent = `${account.code} - ${account.name}`;
+            accountSelect.appendChild(option);
+        });
+        
+        // رسم مخطط توزيع الحسابات
+        renderAccountsChart();
+    } catch (error) {
+        console.error('Error loading accounts:', error);
+    }
+}
+
+// تحميل العملاء
+async function loadCustomers() {
+    try {
+        const response = await fetch('/api/customers');
+        customers = await response.json();
+    } catch (error) {
+        console.error('Error loading customers:', error);
+    }
+}
+
+// تحميل إحصائيات لوحة التحكم
+async function loadDashboardStats() {
+    try {
+        const response = await fetch('/api/dashboard/stats');
+        const stats = await response.json();
+        
+        // تحديث الإحصائيات في الواجهة
+        updateStatsCards(stats);
+    } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+    }
+}
+
+// تحميل بيانات الشهر
+async function loadMonthlyData() {
+    try {
+        const today = new Date();
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        
+        const response = await fetch(`/api/transactions/monthly?start=${formatDate(firstDay)}&end=${formatDate(lastDay)}`);
+        monthlyData = await response.json();
+        
+        // رسم مخطط الأداء الشهري
+        renderPerformanceChart();
+    } catch (error) {
+        console.error('Error loading monthly data:', error);
+    }
+}
+
+// تحميل الفواتير المستحقة
+async function loadDueInvoices() {
+    try {
+        const response = await fetch('/api/invoices/due');
+        const dueInvoices = await response.json();
+        
+        updateDueInvoicesTable(dueInvoices);
+    } catch (error) {
+        console.error('Error loading due invoices:', error);
+    }
+}
+
+// تحميل التنبيهات
+async function loadAlerts() {
+    try {
+        const response = await fetch('/api/alerts');
+        const alerts = await response.json();
+        
+        updateAlertsList(alerts);
+    } catch (error) {
+        console.error('Error loading alerts:', error);
+    }
+}
+
+// تحميل المهام
+async function loadTasks() {
+    try {
+        const response = await fetch('/api/tasks');
+        const tasks = await response.json();
+        
+        updateTasksList(tasks);
+    } catch (error) {
+        console.error('Error loading tasks:', error);
+    }
+}
+
+// تحديث بطاقات الإحصائيات
+function updateStatsCards(stats) {
+    // يمكنك تحديث عناصر HTML الإضافية هنا
+    console.log('Dashboard stats:', stats);
+}
+
+// تحديث جدول الفواتير المستحقة
+function updateDueInvoicesTable(invoices) {
+    const tableBody = document.querySelector('#dueInvoicesTable tbody');
+    const countElement = document.getElementById('dueInvoicesCount');
+    
+    tableBody.innerHTML = '';
+    countElement.textContent = invoices.length;
+    
+    if (invoices.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-muted">
+                    لا توجد فواتير مستحقة
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    invoices.forEach(invoice => {
+        const row = document.createElement('tr');
+        
+        // تحديد لون الحالة
+        let statusBadge = '';
+        if (invoice.status === 'overdue') {
+            statusBadge = '<span class="badge bg-danger">متأخرة</span>';
+        } else if (invoice.status === 'due_soon') {
+            statusBadge = '<span class="badge bg-warning">قريب الاستحقاق</span>';
+        } else {
+            statusBadge = '<span class="badge bg-info">' + invoice.status + '</span>';
         }
+        
+        row.innerHTML = `
+            <td>${invoice.invoice_number}</td>
+            <td>${invoice.customer_name}</td>
+            <td>${formatCurrency(invoice.amount)}</td>
+            <td>${invoice.due_date}</td>
+            <td>${statusBadge}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="viewInvoice(${invoice.id})">
+                    عرض
+                </button>
+                <button class="btn btn-sm btn-success" onclick="recordPayment(${invoice.id})">
+                    تسديد
+                </button>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
     });
 }
 
-function loadChartData() {
-    $.ajax({
-        url: '/api/dashboard/chart-data',
-        method: 'GET',
-        success: function(response) {
-            if (response.success) {
-                renderSalesChart(response.data.monthly_trend);
-                renderAccountsChart(response.data.account_balances);
-            }
-        },
-        error: function() {
-            console.error('Failed to load chart data');
-        }
+// تحديث قائمة التنبيهات
+function updateAlertsList(alerts) {
+    const alertsList = document.getElementById('alertsList');
+    alertsList.innerHTML = '';
+    
+    if (alerts.length === 0) {
+        alertsList.innerHTML = `
+            <div class="alert alert-info">
+                لا توجد تنبيهات حالياً
+            </div>
+        `;
+        return;
+    }
+    
+    alerts.forEach(alert => {
+        const alertItem = document.createElement('div');
+        alertItem.className = 'list-group-item';
+        
+        let alertIcon = '🔔';
+        if (alert.type === 'warning') alertIcon = '⚠️';
+        if (alert.type === 'danger') alertIcon = '🚨';
+        if (alert.type === 'success') alertIcon = '✅';
+        
+        alertItem.innerHTML = `
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">${alertIcon} ${alert.title}</h6>
+                <small>${alert.time}</small>
+            </div>
+            <p class="mb-1">${alert.message}</p>
+            ${alert.action ? `<small><a href="#" onclick="${alert.action}">${alert.action_text}</a></small>` : ''}
+        `;
+        
+        alertsList.appendChild(alertItem);
     });
 }
 
-function renderSalesChart(monthlyData) {
-    const ctx = document.getElementById('salesChart').getContext('2d');
+// تحديث قائمة المهام
+function updateTasksList(tasks) {
+    const tasksList = document.getElementById('tasksList');
+    tasksList.innerHTML = '';
+    
+    if (tasks.length === 0) {
+        tasksList.innerHTML = `
+            <div class="alert alert-info">
+                لا توجد مهام حالياً
+            </div>
+        `;
+        return;
+    }
+    
+    tasks.forEach(task => {
+        const taskItem = document.createElement('div');
+        taskItem.className = 'list-group-item';
+        
+        let taskIcon = '📋';
+        if (task.priority === 'high') taskIcon = '🔥';
+        if (task.priority === 'medium') taskIcon = '⚡';
+        
+        taskItem.innerHTML = `
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-1">${taskIcon} ${task.title}</h6>
+                    <p class="mb-1">${task.description}</p>
+                    <small class="text-muted">${task.due_date}</small>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-success" onclick="completeTask(${task.id})">
+                        ✓
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        tasksList.appendChild(taskItem);
+    });
+}
 
-    const labels = monthlyData.map(item => item.month);
-    const salesData = monthlyData.map(item => item.sales);
-    const purchasesData = monthlyData.map(item => item.purchases);
-
+// رسم مخطط الأداء الشهري
+function renderPerformanceChart() {
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    
+    // تجميع البيانات حسب اليوم
+    const dailyData = {};
+    monthlyData.forEach(transaction => {
+        const date = transaction.date;
+        if (!dailyData[date]) {
+            dailyData[date] = { debit: 0, credit: 0 };
+        }
+        dailyData[date].debit += transaction.debit;
+        dailyData[date].credit += transaction.credit;
+    });
+    
+    const dates = Object.keys(dailyData).sort();
+    const debits = dates.map(date => dailyData[date].debit);
+    const credits = dates.map(date => dailyData[date].credit);
+    
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: labels,
+            labels: dates,
             datasets: [
                 {
-                    label: 'المبيعات',
-                    data: salesData,
+                    label: 'مدين',
+                    data: debits,
                     borderColor: 'rgb(75, 192, 192)',
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     tension: 0.1
                 },
                 {
-                    label: 'المشتريات',
-                    data: purchasesData,
+                    label: 'دائن',
+                    data: credits,
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
                     tension: 0.1
@@ -304,49 +585,42 @@ function renderSalesChart(monthlyData) {
             plugins: {
                 legend: {
                     position: 'top',
-                    rtl: true
                 }
             },
             scales: {
                 y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return formatCurrency(value);
-                        }
-                    }
+                    beginAtZero: true
                 }
             }
         }
     });
 }
 
-function renderAccountsChart(accountBalances) {
-    const ctx = document.getElementById('accountsChart').getContext('2d');
-
-    const labels = ['الأصول', 'الخصوم', 'حقوق الملكية', 'الإيرادات', 'المصروفات'];
-    const data = [
-        accountBalances.asset || 0,
-        accountBalances.liability || 0,
-        accountBalances.equity || 0,
-        accountBalances.revenue || 0,
-        accountBalances.expense || 0
-    ];
-
+// رسم مخطط توزيع الحسابات
+function renderAccountsChart() {
+    const ctx = document.getElementById('accountsDistributionChart').getContext('2d');
+    
+    // تجميع الحسابات حسب النوع
+    const accountTypes = {};
+    accounts.forEach(account => {
+        if (!accountTypes[account.type]) {
+            accountTypes[account.type] = 0;
+        }
+        accountTypes[account.type] += account.balance;
+    });
+    
+    const labels = Object.keys(accountTypes);
+    const data = Object.values(accountTypes);
+    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+    
     new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: [
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(255, 99, 132, 0.8)',
-                    'rgba(75, 192, 192, 0.8)',
-                    'rgba(255, 205, 86, 0.8)',
-                    'rgba(153, 102, 255, 0.8)'
-                ],
-                borderWidth: 1
+                backgroundColor: colors,
+                hoverOffset: 4
             }]
         },
         options: {
@@ -354,25 +628,220 @@ function renderAccountsChart(accountBalances) {
             maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    position: 'left',
-                    rtl: true
+                    position: 'right',
                 }
             }
         }
     });
 }
 
+// عرض مودال إضافة حركة
+function showAddTransaction() {
+    const modal = new bootstrap.Modal(document.getElementById('addTransactionModal'));
+    modal.show();
+}
+
+// حفظ الحركة
+async function saveTransaction() {
+    const debit = parseFloat(document.getElementById('transactionDebit').value) || 0;
+    const credit = parseFloat(document.getElementById('transactionCredit').value) || 0;
+    
+    if (debit === 0 && credit === 0) {
+        alert('الرجاء إدخال قيمة للمدين أو الدائن');
+        return;
+    }
+    
+    const transaction = {
+        date: document.getElementById('transactionDate').value,
+        description: document.getElementById('transactionDescription').value,
+        account_id: document.getElementById('transactionAccount').value,
+        debit: debit,
+        credit: credit
+    };
+    
+    try {
+        const response = await fetch('/api/transactions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(transaction)
+        });
+        
+        if (response.ok) {
+            alert('تم إضافة الحركة بنجاح');
+            bootstrap.Modal.getInstance(document.getElementById('addTransactionModal')).hide();
+            location.reload();
+        } else {
+            throw new Error('خطأ في حفظ الحركة');
+        }
+    } catch (error) {
+        console.error('Error saving transaction:', error);
+        alert('حدث خطأ أثناء حفظ الحركة');
+    }
+}
+
+// عرض مودال إضافة عميل
+function showAddCustomer() {
+    const modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
+    modal.show();
+}
+
+// حفظ العميل
+async function saveCustomer() {
+    const customer = {
+        code: document.getElementById('customerCode').value,
+        name: document.getElementById('customerName').value,
+        phone: document.getElementById('customerPhone').value,
+        email: document.getElementById('customerEmail').value,
+        balance: parseFloat(document.getElementById('customerBalance').value) || 0
+    };
+    
+    try {
+        const response = await fetch('/api/customers', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(customer)
+        });
+        
+        if (response.ok) {
+            alert('تم إضافة العميل بنجاح');
+            bootstrap.Modal.getInstance(document.getElementById('addCustomerModal')).hide();
+            loadCustomers();
+        } else {
+            throw new Error('خطأ في حفظ العميل');
+        }
+    } catch (error) {
+        console.error('Error saving customer:', error);
+        alert('حدث خطأ أثناء حفظ العميل');
+    }
+}
+
+// عرض مودال التقارير
+function showReports() {
+    const modal = new bootstrap.Modal(document.getElementById('reportsModal'));
+    modal.show();
+}
+
+// توليد الميزانية العمومية
+async function generateBalanceSheet() {
+    try {
+        const response = await fetch('/api/reports/balance-sheet');
+        const report = await response.json();
+        
+        displayReport('الميزانية العمومية', report);
+    } catch (error) {
+        console.error('Error generating balance sheet:', error);
+        alert('حدث خطأ أثناء توليد التقرير');
+    }
+}
+
+// توليد قائمة الدخل
+async function generateIncomeStatement() {
+    try {
+        const response = await fetch('/api/reports/income-statement');
+        const report = await response.json();
+        
+        displayReport('قائمة الدخل', report);
+    } catch (error) {
+        console.error('Error generating income statement:', error);
+        alert('حدث خطأ أثناء توليد التقرير');
+    }
+}
+
+// توليد ميزان المراجعة
+async function generateTrialBalance() {
+    try {
+        const response = await fetch('/api/reports/trial-balance');
+        const report = await response.json();
+        
+        displayReport('ميزان المراجعة', report);
+    } catch (error) {
+        console.error('Error generating trial balance:', error);
+        alert('حدث خطأ أثناء توليد التقرير');
+    }
+}
+
+// توليد كشف حساب العميل
+function generateCustomerStatement() {
+    alert('يرجى اختيار عميل لعرض كشف حسابه');
+    // يمكن إضافة منطق لاختيار عميل ثم عرض تقريره
+}
+
+// عرض التقرير
+function displayReport(title, data) {
+    const reportResult = document.getElementById('reportResult');
+    
+    // بناء HTML للتقرير
+    let html = `
+        <div class="card">
+            <div class="card-header">
+                <h5>${title}</h5>
+            </div>
+            <div class="card-body">
+                <pre style="white-space: pre-wrap;">${JSON.stringify(data, null, 2)}</pre>
+            </div>
+        </div>
+    `;
+    
+    reportResult.innerHTML = html;
+    reportResult.style.display = 'block';
+}
+
+// وظائف مساعدة
+function formatDate(date) {
+    return date.toISOString().split('T')[0];
+}
+
 function formatCurrency(amount) {
     return new Intl.NumberFormat('ar-SA', {
         style: 'currency',
-        currency: 'SAR',
-        minimumFractionDigits: 2
+        currency: 'SAR'
     }).format(amount);
 }
 
-// تحديث البيانات كل 5 دقائق
-setInterval(function() {
+function viewInvoice(invoiceId) {
+    window.open(`/invoice/${invoiceId}`, '_blank');
+}
+
+function recordPayment(invoiceId) {
+    alert(`تسديد الفاتورة ${invoiceId} - قيد التطوير`);
+}
+
+function completeTask(taskId) {
+    alert(`إكمال المهمة ${taskId} - قيد التطوير`);
+}
+
+// تحديث البيانات كل دقيقة
+setInterval(() => {
     loadDashboardStats();
-}, 300000);
+    loadDueInvoices();
+    loadAlerts();
+}, 60000);
+
+// إضافة تأثيرات CSS إضافية
+const style = document.createElement('style');
+style.textContent = `
+    .card {
+        transition: transform 0.3s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    .list-group-item {
+        transition: background-color 0.3s;
+    }
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    .badge {
+        font-size: 0.8em;
+    }
+`;
+document.head.appendChild(style);
 </script>
+
 {% endblock %}
