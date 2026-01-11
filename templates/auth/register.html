@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>تسجيل الدخول</title>
+    <title>تسجيل حساب جديد</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,7 +12,7 @@
             align-items: center;
             height: 100vh;
         }
-        .login-box {
+        .register-box {
             background: white;
             padding: 30px;
             width: 350px;
@@ -27,8 +27,6 @@
             width: 100%;
             padding: 10px;
             margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
         }
         button {
             width: 100%;
@@ -38,51 +36,33 @@
             color: white;
             font-size: 16px;
             cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background: #0056b3;
         }
         .error {
             color: red;
             text-align: center;
-            margin-bottom: 15px;
-        }
-        .register-link {
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-        }
-        .register-link a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .register-link a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
 <body>
 
-<div class="login-box">
-    <h2>تسجيل الدخول</h2>
+<div class="register-box">
+    <h2>تسجيل حساب جديد</h2>
 
     {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="error">{{ messages[0] }}</div>
-      {% endif %}
+        {% if messages %}
+            <div class="error">{{ messages[0] }}</div>
+        {% endif %}
     {% endwith %}
 
     <form method="POST">
+        <input type="text" name="username" placeholder="اسم المستخدم" required>
         <input type="email" name="email" placeholder="البريد الإلكتروني" required>
         <input type="password" name="password" placeholder="كلمة المرور" required>
-        <button type="submit">دخول</button>
+        <input type="password" name="confirm_password" placeholder="تأكيد كلمة المرور" required>
+        <button type="submit">تسجيل</button>
     </form>
 
-    <!-- رابط التسجيل للمستخدمين الجدد -->
-    <div class="register-link">
-        <p>ليس لديك حساب؟ <a href="{{ url_for('auth.register') }}">سجل الآن</a></p>
-    </div>
+    <p>هل لديك حساب؟ <a href="{{ url_for('auth.login') }}">تسجيل الدخول</a></p>
 </div>
 
 </body>

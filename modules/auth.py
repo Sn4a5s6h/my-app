@@ -1,7 +1,3 @@
-"""
-نظام المصادقة والأذونات
-"""
-
 from functools import wraps
 from flask import (
     request,
@@ -19,7 +15,7 @@ from flask_login import (
     current_user,
     login_required
 )
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 import logging
 from datetime import datetime
 
@@ -156,6 +152,7 @@ def register_auth_routes(app):
     @app.route('/logout')
     @login_required
     def logout():
+        """تسجيل الخروج"""
         record_audit_log('logout')
         logout_user()
         flash('تم تسجيل الخروج بنجاح', 'success')
@@ -203,6 +200,42 @@ def register_auth_routes(app):
 
         return render_template('auth/profile.html', user=current_user)
 
+    # مسار التسجيل
+    @app.route('/register', methods=['GET', 'POST'])
+    def register():
+        """تسجيل مستخدم جديد"""
+        if current_user.is_authenticated:
+            return redirect(url_for('main.dashboard'))
+
+        if request.method == 'POST':
+            username = request.form.get('username')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            confirm_password = request.form.get('confirm_password')
+
+            # التحقق من أن كلمة المرور و تأكيد كلمة المرور متطابقتان
+            if password != confirm_password:
+                flash('كلمات المرور غير متطابقة', 'error')
+                return redirect(url_for('auth.register'))
+
+            # التحقق من أن البريد الإلكتروني أو اسم المستخدم غير موجود مسبقًا
+            user = User.query.filter_by(email=email).first()
+            if user:
+                flash('البريد الإلكتروني مسجل بالفعل', 'error')
+                return redirect(url_for('auth.register'))
+
+            new_user = User(username=username, email=email)
+            new_user.set_password(password)
+
+            # إضافة المستخدم إلى قاعدة البيانات
+            db.session.add(new_user)
+            db.session.commit()
+
+            flash('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول', 'success')
+            return redirect(url_for('auth.login'))
+
+        return render_template('auth/register.html')
+
     return app
 
 
@@ -212,6 +245,8 @@ def get_current_user_id():
 
 def get_current_user_role():
     return current_user.role if current_user.is_authenticated else None
+
+
 def require_accountant():
     """فرض صلاحية المحاسب"""
     if not current_user.is_authenticated:
