@@ -7,7 +7,14 @@ load_dotenv()
 class Config:
     # إعدادات أساسية
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secure-secret-key-123'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///accounting_system.db'
+
+    # مسار قاعدة البيانات مطلق لضمان العمل على جميع الأجهزة
+    BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+    DB_FILENAME = 'accounting_system.db'
+    INSTANCE_FOLDER = os.path.join(BASE_DIR, 'instance')
+    if not os.path.exists(INSTANCE_FOLDER):
+        os.makedirs(INSTANCE_FOLDER, exist_ok=True)
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f"sqlite:///{os.path.join(INSTANCE_FOLDER, DB_FILENAME)}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 300,
@@ -31,13 +38,15 @@ class Config:
 
     # إعدادات الملفات
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
-    UPLOAD_FOLDER = 'uploads'
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
     ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'xlsx', 'csv'}
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
     # إعدادات التطبيق
     DEBUG = os.environ.get('FLASK_ENV') != 'production'
     HOST = os.environ.get('HOST') or '0.0.0.0'
-    PORT = int(os.environ.get('PORT') or 5000)
+    PORT = int(os.environ.get('PORT') or 5078)
 
     # إعدادات التقارير
     REPORT_DATE_FORMAT = '%Y-%m-%d'
@@ -45,10 +54,6 @@ class Config:
 
     @staticmethod
     def init_app(app):
-        # إنشاء مجلد التحميلات إذا لم يكن موجوداً
-        if not os.path.exists(Config.UPLOAD_FOLDER):
-            os.makedirs(Config.UPLOAD_FOLDER)
-
         # إعدادات إضافية للتطبيق
         app.config['JSON_SORT_KEYS'] = False
         app.config['JSON_AS_ASCII'] = False

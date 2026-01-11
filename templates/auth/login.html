@@ -1,38 +1,11 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="login-container">
-    <div class="login-box">
-        <h2 class="text-center mb-4">🔐 تسجيل الدخول</h2>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <form method="POST" action="{{ url_for('login') }}">
-            <div class="mb-3">
-                <label for="username" class="form-label">اسم المستخدم</label>
-                <input type="text" class="form-control" id="username" name="username" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="password" class="form-label">كلمة المرور</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            
-            <button type="submit" class="btn btn-primary w-100">دخول</button>
-            
-            <div class="text-center mt-3">
-                <small class="text-muted">بيانات الاختبار: admin / admin123</small>
-            </div>
-        </form>
-    </div>
-</div>
+<h2>تسجيل الدخول</h2>
+<form method="POST">
+    <label>اسم المستخدم:</label>
+    <input type="text" name="username" required>
+    <label>كلمة المرور:</label>
+    <input type="password" name="password" required>
+    <button type="submit">دخول</button>
+</form>
 {% endblock %}

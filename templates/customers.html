@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}العملاء{% endblock %}
+
+{% block content %}
+<h2>العملاء</h2>
+
+<button onclick="location.href='{{ url_for('customers') }}'">إضافة عميل</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>الاسم</th>
+      <th>الهاتف</th>
+      <th>البريد الإلكتروني</th>
+      <th>الإجراءات</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>شركة الأمل</td>
+      <td>0123456789</td>
+      <td>amla@example.com</td>
+      <td>
+        <button onclick="alert('عرض العميل')">عرض</button>
+        <button onclick="alert('تعديل العميل')">تعديل</button>
+        <button onclick="alert('حذف العميل')">حذف</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}

@@ -1,69 +1,13 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-    <meta charset="UTF-8">
-    <title>تسجيل حساب جديد</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .register-box {
-            background: white;
-            padding: 30px;
-            width: 350px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #007bff;
-            border: none;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .error {
-            color: red;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-
-<div class="register-box">
-    <h2>تسجيل حساب جديد</h2>
-
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="error">{{ messages[0] }}</div>
-        {% endif %}
-    {% endwith %}
-
-    <form method="POST">
-        <input type="text" name="username" placeholder="اسم المستخدم" required>
-        <input type="email" name="email" placeholder="البريد الإلكتروني" required>
-        <input type="password" name="password" placeholder="كلمة المرور" required>
-        <input type="password" name="confirm_password" placeholder="تأكيد كلمة المرور" required>
-        <button type="submit">تسجيل</button>
-    </form>
-
-    <p>هل لديك حساب؟ <a href="{{ url_for('auth.login') }}">تسجيل الدخول</a></p>
-</div>
-
-</body>
-</html>
+{% extends "base.html" %}
+{% block content %}
+<h2>تسجيل جديد</h2>
+<form method="POST">
+    <label>اسم المستخدم:</label>
+    <input type="text" name="username" required>
+    <label>البريد الإلكتروني:</label>
+    <input type="email" name="email" required>
+    <label>كلمة المرور:</label>
+    <input type="password" name="password" required>
+    <button type="submit">إنشاء الحساب</button>
+</form>
+{% endblock %}

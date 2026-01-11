@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}التقارير{% endblock %}
+
+{% block content %}
+<h2>التقارير</h2>
+
+<form method="get">
+  <label>نوع التقرير:</label>
+  <select name="report_type">
+    <option value="income">إيرادات</option>
+    <option value="expenses">مصروفات</option>
+    <option value="profit">الأرباح</option>
+  </select>
+  <button type="submit">إنشاء تقرير</button>
+</form>
+
+<div style="margin-top:20px;">
+  {% if report %}
+    <p>نتيجة التقرير: {{ report }}</p>
+  {% else %}
+    <p>اختر نوع التقرير واضغط "إنشاء تقرير"</p>
+  {% endif %}
+</div>
+{% endblock %}

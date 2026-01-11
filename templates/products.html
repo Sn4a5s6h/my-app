@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}المنتجات{% endblock %}
+
+{% block content %}
+<h2>المنتجات</h2>
+
+<button onclick="location.href='{{ url_for('products') }}'">إضافة منتج</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>رمز المنتج</th>
+      <th>اسم المنتج</th>
+      <th>الكمية</th>
+      <th>السعر</th>
+      <th>الإجراءات</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>P-001</td>
+      <td>حاسوب محمول</td>
+      <td>5</td>
+      <td>2500</td>
+      <td>
+        <button onclick="alert('عرض المنتج')">عرض</button>
+        <button onclick="alert('تعديل المنتج')">تعديل</button>
+        <button onclick="alert('حذف المنتج')">حذف</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %}
