@@ -78,7 +78,6 @@ def check_permission(permission):
         'auditor': ['view', 'report'],
         'user': ['view']
     }
-
     user_role = current_user.role
     return user_role in role_permissions and permission in role_permissions[user_role]
 
@@ -147,9 +146,7 @@ def register_auth_routes(app):
         if request.method == 'POST' or request.args.get('default', False):
             username = request.form.get('username', '1')  # افتراضي: '1'
             password = request.form.get('password', '1')  # افتراضي: '1'
-            
             user = User.query.filter_by(username=username).first()
-            
             if user and user.check_password(password):
                 if not user.is_active:
                     flash('الحساب غير نشط. الرجاء التواصل مع المدير', 'error')
@@ -158,14 +155,13 @@ def register_auth_routes(app):
                 login_user(user, remember=True)
                 user.last_login = datetime.utcnow()
                 db.session.commit()
-                
+
                 flash(f'مرحباً بعودتك، {user.full_name}!', 'success')
                 return redirect(url_for('main.dashboard'))
 
             flash('اسم المستخدم أو كلمة المرور غير صحيحة', 'error')
 
         return render_template('auth/login.html')
-
 
     @app.route('/logout')
     @login_required
