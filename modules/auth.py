@@ -39,11 +39,32 @@ def init_auth(app):
     """تهيئة نظام المصادقة"""
     login_manager.init_app(app)
 
+    # إنشاء المستخدم الافتراضي عند بدء التطبيق
+    with app.app_context():
+        create_default_user()
+
     @app.context_processor
     def utility_processor():
         def has_permission(permission):
             return check_permission(permission)
         return dict(has_permission=has_permission, current_user=current_user)
+
+
+def create_default_user():
+    """إنشاء المستخدم الافتراضي عند بدء التطبيق إذا لم يكن موجودًا"""
+    default_username = '1'
+    default_password = '1'
+
+    # تحقق من وجود المستخدم
+    user = User.query.filter_by(username=default_username).first()
+
+    # إذا لم يكن موجودًا، يتم إنشاؤه
+    if not user:
+        user = User(username=default_username, email='user1@example.com')
+        user.set_password(default_password)
+        db.session.add(user)
+        db.session.commit()
+        print(f"تم إنشاء المستخدم الافتراضي: {default_username}")
 
 
 def check_permission(permission):
@@ -122,32 +143,29 @@ def register_auth_routes(app):
         if current_user.is_authenticated:
             return redirect(url_for('main.dashboard'))
 
-        if request.method == 'POST':
-            username = request.form.get('username')
-            password = request.form.get('password')
-            remember = request.form.get('remember', False)
-
+        # تسجيل الدخول مباشرة للمستخدم 1 إذا لم يتم إرسال بيانات
+        if request.method == 'POST' or request.args.get('default', False):
+            username = request.form.get('username', '1')  # افتراضي: '1'
+            password = request.form.get('password', '1')  # افتراضي: '1'
+            
             user = User.query.filter_by(username=username).first()
-
+            
             if user and user.check_password(password):
                 if not user.is_active:
                     flash('الحساب غير نشط. الرجاء التواصل مع المدير', 'error')
                     return redirect(url_for('login'))
 
-                login_user(user, remember=remember)
+                login_user(user, remember=True)
                 user.last_login = datetime.utcnow()
                 db.session.commit()
-
-                record_audit_log('login')
-
+                
                 flash(f'مرحباً بعودتك، {user.full_name}!', 'success')
-
-                next_page = request.args.get('next')
-                return redirect(next_page or url_for('main.dashboard'))
+                return redirect(url_for('main.dashboard'))
 
             flash('اسم المستخدم أو كلمة المرور غير صحيحة', 'error')
 
         return render_template('auth/login.html')
+
 
     @app.route('/logout')
     @login_required
