@@ -12,7 +12,7 @@ config.init_app(app)
 db = SQLAlchemy(app)
 
 # -------------------------------
-# نموذج مستخدم بسيط
+# نموذج مستخدم
 # -------------------------------
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -31,12 +31,15 @@ with app.app_context():
         print("❌ خطأ في إنشاء قاعدة البيانات:", e)
 
 # -------------------------------
-# الصفحات الأساسية
+# صفحات رئيسية
 # -------------------------------
 @app.route('/')
-@app.route('/dashboard')  # يمكن الوصول من كلا الرابطين
-def dashboard():
+def index():
     return render_template('index.html')
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 
 @app.route('/profile')
 def profile():
