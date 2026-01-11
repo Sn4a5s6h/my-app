@@ -19,8 +19,7 @@ else:
     # محلياً
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///accounting.db'
     app.config['SECRET_KEY'] = 'dev-secret-key'
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # تهيئة الإضافات
 db = SQLAlchemy(app)
