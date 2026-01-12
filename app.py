@@ -322,7 +322,7 @@ def triangulate_location(towers):
     
     return weighted_lat, weighted_lon
 
-def generate_map(actual_lat, actual_lon, estimated_lat, estimated_lon, towers, carrier):
+def generate_map(actual_lat, actual_lon, estimated_lat, estimated_lon, towers, carrier="Unknown"):
     """إنشاء خريطة بصيغة Base64"""
     try:
         plt.figure(figsize=(12, 10))
