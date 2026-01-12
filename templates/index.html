@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام تتبع رقم الجوال - اليمن</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --warning: #f39c12;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Cairo', 'Segoe UI', sans-serif;
+        }
+        
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border: none;
+            transition: transform 0.3s;
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .btn-search {
+            background: linear-gradient(135deg, var(--secondary), #2980b9);
+            border: none;
+            padding: 12px 40px;
+            font-weight: bold;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        
+        .btn-search:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .phone-input {
+            font-size: 1.5rem;
+            text-align: center;
+            letter-spacing: 2px;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 15px;
+        }
+        
+        .phone-input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+        }
+        
+        .result-card {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .map-container {
+            border-radius: 15
+		                                </div>
+                            <div class="col-md-4">
+                                <div class="card mb-3">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-tower-cell fa-3x mb-3 text-warning"></i>
+                                        <h5>دعم الشركات اليمنية</h5>
+                                        <p>يدعم النظام جميع شركات الاتصالات اليمنية: STC، يمن موبايل، صابافون، MTN</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="disclaimer mt-3 p-3 bg-light rounded">
+                            <h6><i class="fas fa-exclamation-triangle me-2 text-warning"></i>تنبيه هام:</h6>
+                            <p class="mb-0">
+                                هذا النظام مخصص للاستخدامات القانونية والطوارئ فقط. أي استخدام غير قانوني يعد مخالفة للقانون.
+                                البيانات المعروضة هي بيانات محاكاة لأغراض التوضيح والتعليم.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نموذج تصدير البيانات -->
+    <div class="modal fade" id="exportModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تصدير بيانات التتبع</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>اختر صيغة التصدير:</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="exportAsJSON()">
+                            <i class="fas fa-file-code me-2"></i>JSON
+                        </button>
+                        <button class="btn btn-outline-success" onclick="exportAsCSV()">
+                            <i class="fas fa-file-csv me-2"></i>CSV
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="exportAsPDF()">
+                            <i class="fas fa-file-pdf me-2"></i>PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نموذج سجل المواقع -->
+    <div class="modal fade" id="historyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">سجل مواقع الهاتف</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="historyContent">
+                        <p>جاري تحميل السجل...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تذييل الصفحة -->
+    <footer class="text-center text-white py-4 mt-5">
+        <p class="mb-0">© 2024 نظام تتبع الجوال - اليمن. جميع الحقوق محفوظة.</p>
+        <p class="mb-0"><small>هذا المشروع تعليمي ولا يهدف للاستخدام التجاري أو غير القانوني</small></p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // حالات التطبيق
+        let currentPhone = '';
+        let currentData = null;
+        let isLoggedIn = false;
+
+        // عرض/إخفاء نافذة تسجيل الدخول
+        function showLogin() {
+            document.getElementById('loginModal').style.display = 'flex';
+        }
+
+        function hideLogin() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+
+        // إعداد رقم هاتف في حقل البحث
+        function setPhone(phone) {
+            document.getElementById('phoneNumber').value = phone;
+        }
+
+        // تسجيل الدخول
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'username': username,
+                        'password': password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    isLoggedIn = true;
+                    document.getElementById('loginLink').innerHTML = 
+                        `<i class="fas fa-user me-1"></i>${username}`;
+                    hideLogin();
+                    alert('تم تسجيل الدخول بنجاح!');
+                } else {
+                    alert('خطأ في تسجيل الدخول: ' + data.message);
+                }
+            } catch (error) {
+                alert('خطأ في الاتصال بالخادم');
+                console.error(error);
+            }
+        });
+
+        // البحث عن رقم الهاتف
+        async function searchPhone() {
+            const phoneInput = document.getElementById('phoneNumber').value.trim();
+            
+            if (!phoneInput) {
+                alert('يرجى إدخال رقم الهاتف');
+                return;
+            }
+            
+            // التحقق من تسجيل الدخول
+            if (!isLoggedIn) {
+                alert('يجب تسجيل الدخول أولاً');
+                showLogin();
+                return;
+            }
+            
+            // التحقق من صحة رقم الهاتف
+            const phoneRegex = /^(0)?(5[0-9]{8})$/;
+            if (!phoneRegex.test(phoneInput)) {
+                alert('يرجى إدخال رقم هاتف يمني صحيح (10 أرقام، يبدأ بـ 05)');
+                return;
+            }
+            
+            currentPhone = phoneInput;
+            
+            // عرض حالة التحميل
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultCard').style.display = 'none';
+            
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phone_number: phoneInput
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentData = data;
+                    displayResults(data);
+                } else {
+                    alert('خطأ: ' + data.message);
+                }
+            } catch (error) {
+                alert('خطأ في الاتصال بالخادم');
+                console.error(error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // عرض النتائج
+        function displayResults(data) {
+            // تحديث معلومات الهاتف
+            document.getElementById('resultPhone').textContent = data.phone_number;
+            document.getElementById('carrierBadge').textContent = data.carrier;
+            document.getElementById('carrierBadge').className = `carrier-badge ${data.carrier.toLowerCase().replace(' ', '-')}`;
+            document.getElementById('lastSeen').textContent = new Date(data.last_seen).toLocaleString('ar-YE');
+            document.getElementById('networkType').textContent = data.network_type;
+            document.getElementById('batteryLevel').textContent = data.battery_level;
+            document.getElementById('deviceStatus').textContent = data.status === 'active' ? 'متصل' : 'غير متصل';
+            
+            // تحديث الموقع
+            document.getElementById('locationDetails').innerHTML = `
+                <strong>العنوان:</strong> ${data.location.address}<br>
+                <strong>الإحداثيات:</strong> ${data.location.lat.toFixed(6)}, ${data.location.lon.toFixed(6)}
+            `;
+            document.getElementById('accuracy').textContent = `${data.accuracy_meters} متر`;
+            
+            // عرض الخريطة
+            if (data.map_image) {
+                document.getElementById('mapImage').src = `data:image/png;base64,${data.map_image}`;
+            }
+            
+            // عرض الأبراج
+            let towersHTML = '';
+            data.towers.forEach((tower, index) => {
+                const signalPercent = Math.min(100, Math.max(0, tower.signal_percentage));
+                towersHTML += `
+                    <div class="card mb-2">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h6 class="mb-1">${tower.name}</h6>
+                                    <small class="text-muted">${tower.carrier}</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="mb-1">${tower.distance_km} كم</div>
+                                    <div class="signal-bar" style="width: 100px;">
+                                        <div class="signal-indicator" style="left: ${signalPercent}%;"></div>
+                                    </div>
+                                    <small>${tower.signal_strength.toFixed(1)} dBm</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('towersList').innerHTML = towersHTML;
+            
+            // عرض بطاقة النتائج
+            document.getElementById('resultCard').style.display = 'block';
+            
+            // التمرير إلى النتائج
+            document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // تحديث الموقع
+        function refreshLocation() {
+            if (currentPhone) {
+                searchPhone();
+            }
+        }
+
+        // تصدير البيانات
+        function exportData() {
+            const modal = new bootstrap.Modal(document.getElementById('exportModal'));
+            modal.show();
+        }
+
+        function exportAsJSON() {
+            if (!currentData) return;
+            
+            const dataStr = JSON.stringify(currentData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `phone_tracking_${currentPhone}_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function exportAsCSV() {
+            if (!currentData) return;
+            
+            let csvContent = "بيانات تتبع الهاتف\n\n";
+            csvContent += `رقم الهاتف,${currentData.phone_number}\n`;
+            csvContent += `الشركة,${currentData.carrier}\n`;
+            csvContent += `خط العرض,${currentData.location.lat}\n`;
+            csvContent += `خط الطول,${currentData.location.lon}\n`;
+            csvContent += `العنوان,${currentData.location.address}\n`;
+            csvContent += `الدقة,${currentData.accuracy_meters} متر\n`;
+            csvContent += `آخر ظهور,${currentData.last_seen}\n`;
+            csvContent += `نوع الشبكة,${currentData.network_type}\n`;
+            csvContent += `مستوى البطارية,${currentData.battery_level}\n`;
+            
+            const dataUri = 'data:text/csv;charset=utf-8,'+ encodeURIComponent(csvContent);
+            const exportFileDefaultName = `phone_tracking_${currentPhone}_${new Date().toISOString().slice(0,10)}.csv`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        function exportAsPDF() {
+            alert('خاصية تصدير PDF قيد التطوير');
+        }
+
+        // عرض سجل المواقع
+        async function showHistory() {
+            if (!currentPhone) return;
+            
+            const modal = new bootstrap.Modal(document.getElementById('historyModal'));
+            modal.show();
+            
+            try {
+                const response = await fetch(`/api/phone_history/${currentPhone}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    let historyHTML = '<table class="table table-striped"><thead><tr><th>الوقت</th><th>الإحداثيات</th><th>الدقة</th></tr></thead><tbody>';
+                    
+                    data.history.forEach(point => {
+                        historyHTML += `
+                            <tr>
+                                <td>${new Date(point.timestamp).toLocaleString('ar-YE')}</td>
+                                <td>${point.lat.toFixed(6)}, ${point.lon.toFixed(6)}</td>
+                                <td>${point.accuracy} متر</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    historyHTML += '</tbody></table>';
+                    document.getElementById('historyContent').innerHTML = historyHTML;
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('historyContent').innerHTML = '<p class="text-danger">خطأ في تحميل السجل</p>';
+            }
+        }
+
+        // تسجيل الدخول تلقائياً عند التحميل (للتجربة)
+        window.onload = function() {
+            // محاكاة تسجيل الدخول تلقائياً للتجربة
+            isLoggedIn = true;
+            document.getElementById('loginLink').innerHTML = 
+                `<i class="fas fa-user me-1"></i>مستخدم تجريبي`;
+            
+            // إضافة مستمع لأزرار الأمثلة
+            document.querySelectorAll('.btn-outline-primary, .btn-outline-success, .btn-outline-warning, .btn-outline-info').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const phone = this.textContent.split(' ')[0];
+                    setPhone(phone);
+                });
+            });
+        };
+
+        // السماح بالبحث عند الضغط على Enter
+        document.getElementById('phoneNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchPhone();
+            }
+        });
+    </script>
+</body>
+</html>

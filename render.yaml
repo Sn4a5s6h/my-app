@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: yemen-phone-tracker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: API_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/health
+    autoDeploy: true
