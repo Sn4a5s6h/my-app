@@ -81,7 +81,7 @@ def logout():
 def search_phone():
     """البحث عن رقم هاتف وتحديد موقعه"""
     if 'user_id' not in session:
-        return jsonify({'success': False, 'message': 'يجب تسجيل الدخول أولاً'}), 401
+        return jsonify({'success': False, 'message': 'يجب تسجيل الدخول أولاً ولتسجيل الدخول يرجى تواصل بالدعم الفني 967733393303'}), 401
     
     try:
         data = request.json
@@ -191,7 +191,7 @@ def search_phone():
 def phone_history(phone_number):
     """الحصول على سجل مواقع الهاتف"""
     if 'user_id' not in session:
-        return jsonify({'success': False, 'message': 'يجب تسجيل الدخول أولاً'}), 401
+        return jsonify({'success': False, 'message': 'يجب تسجيل الدخول أولاً ولتسجيل الدخول يرجى الاواصل بالدعم الفني 967733393303'}), 401
     
     # محاكاة سجل المواقع
     history = []
