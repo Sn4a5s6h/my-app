@@ -226,7 +226,7 @@
                                        class="form-control phone-input" 
                                        id="phoneNumber" 
                                        placeholder="أدخل رقم الجوال (مثال: 0501234567)"
-                                       maxlength="10">
+                                       maxlength="9">
                                 <button class="btn btn-search" type="button" onclick="searchPhone()" style="border-radius: 0 15px 15px 0;">
                                     <i class="fas fa-search me-2"></i>تتبع
                                 </button>
@@ -259,7 +259,7 @@
         
         <!-- بطاقة النتائج -->
         <div class="row justify-content-center">
-            <div class="col-md-10">
+            <div class="col-md-09">
                 <div class="card result-card" id="resultCard">
                     <div class="card-header bg-primary text-white">
                         <h4 class="mb-0">
@@ -533,7 +533,7 @@
             }
             
             // التحقق من صحة رقم الهاتف
-            const phoneRegex = /^(0)?(5[0-9]{8})$/;
+            const phoneRegex = /^(0)?(73|77|78|70|71)[0-9]{7}$/;
             if (!phoneRegex.test(phoneInput)) {
                 alert('يرجى إدخال رقم هاتف يمني صحيح (10 أرقام، يبدأ بـ 05)');
                 return;
@@ -647,7 +647,7 @@
             const dataStr = JSON.stringify(currentData, null, 2);
             const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
             
-            const exportFileDefaultName = `phone_tracking_${currentPhone}_${new Date().toISOString().slice(0,10)}.json`;
+            const exportFileDefaultName = `phone_tracking_${currentPhone}_${new Date().toISOString().slice(0,9)}.json`;
             
             const linkElement = document.createElement('a');
             linkElement.setAttribute('href', dataUri);
@@ -670,7 +670,7 @@
             csvContent += `مستوى البطارية,${currentData.battery_level}\n`;
             
             const dataUri = 'data:text/csv;charset=utf-8,'+ encodeURIComponent(csvContent);
-            const exportFileDefaultName = `phone_tracking_${currentPhone}_${new Date().toISOString().slice(0,10)}.csv`;
+            const exportFileDefaultName = `phone_tracking_${currentPhone}_${new Date().toISOString().slice(0,9)}.csv`;
             
             const linkElement = document.createElement('a');
             linkElement.setAttribute('href', dataUri);
