@@ -3,549 +3,492 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام تتبع رقم الجوال - سبتان</title>
+    <title>نظام التتبع الأمني - غرفة التحكم السيبرانية</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --danger: #e74c3c;
-            --success: #2ecc71;
-            --warning: #f39c12;
+            --cyber-blue: #00ffff;
+            --cyber-green: #00ff00;
+            --cyber-red: #ff0055;
+            --cyber-purple: #9d00ff;
+            --dark-bg: #0a0a1a;
+            --panel-bg: rgba(0, 20, 40, 0.9);
         }
-        
+
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--dark-bg);
+            font-family: 'Cairo', sans-serif;
+            color: white;
             min-height: 100vh;
-            font-family: 'Cairo', 'Segoe UI', sans-serif;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0, 100, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 100, 0.1) 0%, transparent 50%);
+            animation: pulseBackground 10s infinite alternate;
         }
-        
-        .card {
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            border: none;
-            transition: transform 0.3s;
-            background: rgba(255, 255, 255, 0.95);
+
+        @keyframes pulseBackground {
+            0% { background-color: #0a0a1a; }
+            100% { background-color: #0a1a2a; }
         }
-        
-        .card:hover {
-            transform: translateY(-5px);
+
+        .cyber-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--cyber-blue);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .navbar-brand {
-            font-weight: bold;
-            font-size: 1.5rem;
+
+        .cyber-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyber-blue), var(--cyber-purple));
         }
-        
-        .btn-search {
-            background: linear-gradient(135deg, var(--secondary), #2980b9);
-            border: none;
-            padding: 12px 40px;
-            font-weight: bold;
-            border-radius: 50px;
-            transition: all 0.3s;
+
+        .cyber-title {
+            color: var(--cyber-blue);
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            border-bottom: 2px solid var(--cyber-blue);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
         }
-        
-        .btn-search:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
-        }
-        
-        .phone-input {
-            font-size: 1.5rem;
+
+        .cyber-input {
+            background: rgba(0, 30, 60, 0.8);
+            border: 1px solid var(--cyber-blue);
+            color: white;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 1.2rem;
             text-align: center;
             letter-spacing: 2px;
-            border: 2px solid #ddd;
-            border-radius: 15px;
-            padding: 15px;
         }
-        
-        .phone-input:focus {
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+
+        .cyber-input:focus {
+            border-color: var(--cyber-green);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            background: rgba(0, 40, 80, 0.9);
         }
-        
-        .result-card {
-            display: none;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .map-container {
-            border-radius: 15px;
+
+        .cyber-btn {
+            background: linear-gradient(135deg, var(--cyber-blue), var(--cyber-purple));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            position: relative;
             overflow: hidden;
-            border: 3px solid var(--primary);
         }
-        
+
+        .cyber-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .cyber-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+        }
+
+        .cyber-btn:hover::after {
+            left: 100%;
+        }
+
+        .threat-low { color: var(--cyber-green); }
+        .threat-medium { color: #ffaa00; }
+        .threat-high { color: var(--cyber-red); }
+
         .signal-bar {
             height: 20px;
             background: linear-gradient(to right, #ff0000, #ffff00, #00ff00);
             border-radius: 10px;
             position: relative;
+            overflow: hidden;
         }
-        
-        .signal-indicator {
+
+        .signal-bar::after {
+            content: '';
             position: absolute;
-            height: 25px;
-            width: 5px;
-            background: #000;
-            top: -2.5px;
-        }
-        
-        .carrier-badge {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            color: white;
-        }
-        
-        .stc { background: #ff0000; }
-        .yemen-mobile { background: #008000; }
-        .sabafon { background: #ffa500; }
-        .mtn { background: #ffff00; color: #000; }
-        
-        .loading {
-            display: none;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--secondary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .login-modal {
-            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255,255,255,0.2) 50%, 
+                transparent 100%);
+            animation: scan 2s infinite linear;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .terminal {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #0f0;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin-bottom: 5px;
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .map-container {
+            border: 2px solid var(--cyber-blue);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .support-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
             z-index: 1000;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(37, 211, 102, 0.5);
+            transition: all 0.3s;
         }
-        
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 400px;
+
+        .support-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.7);
         }
-        
-        .disclaimer {
-            font-size: 0.8rem;
-            color: #666;
-            text-align: center;
-            margin-top: 20px;
+
+        .login-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 100, 255, 0.3);
+            border: 1px solid var(--cyber-blue);
+            border-radius: 5px;
+            padding: 5px 15px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <!-- شريط التنقل -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-satellite-dish me-2"></i>تتبع رقم الهاتف 
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="loginLink">
-                            <i class="fas fa-sign-in-alt me-1"></i>تسجيل الدخول
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#about">
-                            <i class="fas fa-info-circle me-1"></i>عن النظام
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <!-- زر الدعم العائم -->
+    <button class="support-btn" onclick="contactSupport()">
+        <i class="fab fa-whatsapp me-2"></i>الدعم الفني: 967733393303
+    </button>
 
-    <!-- نافذة تسجيل الدخول -->
-    <div id="loginModal" class="login-modal" style="display: none;">
-        <div class="login-box">
-            <h3 class="text-center mb-4">🔐 تسجيل الدخول</h3>
-            <form id="loginForm">
-                <div class="mb-3">
-                    <label class="form-label">اسم المستخدم</label>
-                    <input type="text" class="form-control" id="loginUsername" value="admin" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">كلمة المرور</label>
-                    <input type="password" class="form-control" id="loginPassword" value="admin123" required>
-                </div>
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary">دخول</button>
-                    <button type="button" class="btn btn-secondary" onclick="hideLogin()">إلغاء</button>
-                </div>
-            </form>
-            <div class="disclaimer mt-3">
-                <small>بيانات الدخول الافتراضية: admin / admin123</small>
-            </div>
-        </div>
+    <!-- شارة النظام -->
+    <div class="login-badge">
+        <i class="fas fa-shield-alt me-2"></i>النظام الأمني - دخول حر
     </div>
 
     <!-- المحتوى الرئيسي -->
-    <div class="container py-5">
-        <!-- بطاقة البحث -->
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card mb-4">
-                    <div class="card-body text-center p-5">
-                        <h1 class="display-4 mb-4">📱 تتبع رقم الجوال</h1>
-                        <p class="lead mb-4">أدخل رقم الجوال  لتحديد موقعه الجغرافي</p>
-                        
-                        <div class="mb-4">
-                            <div class="input-group input-group-lg">
-                                <span class="input-group-text" style="border-radius: 15px 0 0 15px;">
-                                    <i class="fas fa-phone"></i>
-                                </span>
-                                <input type="text" 
-                                       class="form-control phone-input" 
-                                       id="phoneNumber" 
-                                       placeholder="أدخل رقم الجوال (مثال: 733393303)"
-                                       maxlength="9">
-                                <button class="btn btn-search" type="button" onclick="searchPhone()" style="border-radius: 0 15px 15px 0;">
-                                    <i class="fas fa-search me-2"></i>تتبع
+    <div class="container py-4">
+        <!-- العنوان الرئيسي -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="cyber-panel text-center">
+                    <h1 class="cyber-title">
+                        <i class="fas fa-satellite-dish me-2"></i>
+                        نظام التتبع الأمني - غرفة التحكم السيبرانية
+                    </h1>
+                    <p class="lead mb-0">
+                        <span class="text-warning blink">⚠️</span> 
+                        نظام متقدم لتتبع وتحليل أرقام الهواتف - النسخة الاحترافية
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- لوحة البحث -->
+        <div class="row mb-4">
+            <div class="col-md-8 mx-auto">
+                <div class="cyber-panel">
+                    <h3 class="cyber-title">
+                        <i class="fas fa-search me-2"></i>لوحة البحث المتقدمة
+                    </h3>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">أدخل رقم الجوال:</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text" style="background: rgba(0, 30, 60, 0.8); border-color: var(--cyber-blue); color: white;">
+                                <i class="fas fa-phone"></i>
+                            </span>
+                            <input type="text" 
+                                   class="form-control cyber-input" 
+                                   id="phoneNumber"
+                                   placeholder="مثال: 733393303"
+                                   maxlength="9">
+                            <button class="btn cyber-btn" onclick="searchPhone()">
+                                <i class="fas fa-crosshairs me-2"></i>تتبع
+                            </button>
+                        </div>
+                        <div class="form-text text-muted mt-2">
+                            أدخل 9 أرقام للبدء - النظام يعمل بدون تسجيل دخول
+                        </div>
+                    </div>
+
+                    <!-- أمثلة سريعة -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <p class="mb-2">أمثلة سريعة:</p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-outline-info btn-sm" onclick="setPhone('733393303')">
+                                    <i class="fas fa-user-secret me-1"></i>733393303
+                                </button>
+                                <button class="btn btn-outline-success btn-sm" onclick="setPhone('776730674')">
+                                    <i class="fas fa-mobile-alt me-1"></i>776730674
+                                </button>
+                                <button class="btn btn-outline-warning btn-sm" onclick="setPhone('711111111')">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>711111111
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="setPhone('700000000')">
+                                    <i class="fas fa-skull-crossbones me-1"></i>700000000
                                 </button>
                             </div>
-                            <div class="form-text mt-2">أدخل رقم الجوال  (9 أرقام)</div>
                         </div>
-                        
-                        <!-- مثال أرقام -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <p class="mb-2">أمثلة للأرقام:</p>
-                                <div class="d-flex flex-wrap gap-2 justify-content-center">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="setPhone('733393303')">733393303 (you)</button>
-                                    <button class="btn btn-outline-success btn-sm" onclick="setPhone('776730674')">776730674 (يمن موبايل)</button>
-                                    <button class="btn btn-outline-warning btn-sm" onclick="setPhone('711111111')">711111111 (سبافون)</button>
-                                    <button class="btn btn-outline-info btn-sm" onclick="setPhone('733393303')">733393303 (MTN)</button>
-                                </div>
-                            </div>
+                    </div>
+
+                    <!-- التحميل -->
+                    <div class="text-center mt-4" id="loading" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
                         </div>
-                        
-                        <!-- حالة التحميل -->
-                        <div class="loading" id="loading">
-                            <div class="spinner mx-auto mb-3"></div>
-                            <p>جاري البحث وتحديد الموقع...</p>
+                        <p class="mt-2 text-info">جاري فك تشفير البيانات وتحديد الموقع...</p>
+                        <div class="terminal mt-3" id="terminalOutput">
+                            <div class="terminal-line">> تهيئة النظام الأمني...</div>
+                            <div class="terminal-line">> الاتصال بقاعدة البيانات...</div>
+                            <div class="terminal-line">> فحص رقم الهاتف...</div>
+                            <div class="terminal-line">> تحديد الموقع الجغرافي...</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- بطاقة النتائج -->
-        <div class="row justify-content-center">
-            <div class="col-md-09">
-                <div class="card result-card" id="resultCard">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">
-                            <i class="fas fa-map-marker-alt me-2"></i>نتائج التتبع
-                            <span class="float-start" id="resultPhone"></span>
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <!-- معلومات الهاتف -->
-                            <div class="col-md-6">
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <i class="fas fa-mobile-alt me-2"></i>معلومات الجهاز
-                                        </h5>
-                                        <table class="table">
-                                            <tr>
-                                                <th>الشركة:</th>
-                                                <td>
-                                                    <span class="carrier-badge" id="carrierBadge">STC</span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>الحالة:</th>
-                                                <td><span class="badge bg-success" id="deviceStatus">متصل</span></td>
-                                            </tr>
-                                            <tr>
-                                                <th>آخر ظهور:</th>
-                                                <td id="lastSeen">الآن</td>
-                                            </tr>
-                                            <tr>
-                                                <th>شبكة الاتصال:</th>
-                                                <td id="networkType">4G</td>
-                                            </tr>
-                                            <tr>
-                                                <th>مستوى البطارية:</th>
-                                                <td id="batteryLevel">85%</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                                
-                                <!-- الأبراج المتصلة -->
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <i class="fas fa-satellite me-2"></i>الأبراج المتصلة
-                                        </h5>
-                                        <div id="towersList"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- الخريطة والموقع -->
-                            <div class="col-md-6">
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <i class="fas fa-map me-2"></i>الموقع الجغرافي
-                                        </h5>
-                                        <div class="map-container mb-3">
-                                            <img id="mapImage" src="" alt="الخريطة" class="img-fluid">
-                                        </div>
-                                        <div class="alert alert-info">
-                                            <h6>تفاصيل الموقع:</h6>
-                                            <p id="locationDetails">جاري التحديد...</p>
-                                            <p class="mb-0"><strong>الدقة:</strong> <span id="accuracy">150 متر</span></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- إجراءات -->
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title">
-                                            <i class="fas fa-cogs me-2"></i>إجراءات
-                                        </h5>
-                                        <div class="d-grid gap-2">
-                                            <button class="btn btn-success" onclick="showHistory()">
-                                                <i class="fas fa-history me-2"></i>عرض السجل
-                                            </button>
-                                            <button class="btn btn-warning" onclick="refreshLocation()">
-                                                <i class="fas fa-sync-alt me-2"></i>تحديث الموقع
-                                            </button>
-                                            <button class="btn btn-info" onclick="exportData()">
-                                                <i class="fas fa-download me-2"></i>تصدير البيانات
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- قسم عن النظام -->
-        <div class="row mt-5" id="about">
+
+        <!-- النتائج -->
+        <div class="row" id="resultsSection" style="display: none;">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title">
-                            <i class="fas fa-info-circle me-2"></i>عن نظام تتبع الجوال
-                        </h3>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="card mb-3">
-                                    <div class="card-body text-center">
-                                        <i class="fas fa-satellite fa-3x mb-3 text-primary"></i>
-                                        <h5>تقنية التثليث</h5>
-                                        <p>يستخدم النظام تقنية تتبع عبر أبراج شبكات الهاتف المحمول لتحديد الموقع الجغرافي</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card mb-3">
-                                    <div class="card-body text-center">
-                                        <i class="fas fa-shield-alt fa-3x mb-3 text-success"></i>
-                                        <h5>أمان وخصوصية</h5>
-                                        <p>النظام مصمم لخدمات الطوارئ والاستخدامات القانونية مع الحفاظ على الخصوصية</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card mb-3">
-                                    <div class="card-body text-center">
-                                        <i class="fas fa-tower-cell fa-3x mb-3 text-warning"></i>
-                                        <h5>دعم شركات الاتصالات</h5>
-                                        <p>يدعم النظام جميع شركات الاتصالات في العالم</p>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- معلومات الرقم -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="cyber-panel h-100">
+                            <h3 class="cyber-title">
+                                <i class="fas fa-id-card me-2"></i>معلومات الرقم
+                            </h3>
+                            <div id="phoneInfo"></div>
                         </div>
-                        <div class="disclaimer mt-3 p-3 bg-light rounded">
-                            <h6><i class="fas fa-exclamation-triangle me-2 text-warning"></i>تنبيه هام:</h6>
-                            <p class="mb-0">
-                                هذا النظام مخصص للاستخدامات القانونية والطوارئ فقط. أي استخدام غير قانوني يعد مخالفة للقانون.
-                            </p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="cyber-panel h-100">
+                            <h3 class="cyber-title">
+                                <i class="fas fa-map-marked-alt me-2"></i>الموقع الجغرافي
+                            </h3>
+                            <div id="locationInfo"></div>
                         </div>
                     </div>
                 </div>
+
+                <!-- الخريطة -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="cyber-panel">
+                            <h3 class="cyber-title">
+                                <i class="fas fa-globe-americas me-2"></i>خريطة التتبع
+                            </h3>
+                            <div class="map-container">
+                                <img id="mapImage" src="" alt="" class="img-fluid w-100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الأبراج والتقرير -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="cyber-panel h-100">
+                            <h3 class="cyber-title">
+                                <i class="fas fa-satellite me-2"></i>الأبراج المتصلة
+                            </h3>
+                            <div id="towersInfo"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="cyber-panel h-100">
+                            <h3 class="cyber-title">
+                                <i class="fas fa-file-contract me-2"></i>تقرير التهديد
+                            </h3>
+                            <div id="threatReport"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- نموذج تصدير البيانات -->
-    <div class="modal fade" id="exportModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">تصدير بيانات التتبع</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <!-- لوحة الإحصائيات -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="cyber-panel">
+                    <h3 class="cyber-title">
+                        <i class="fas fa-chart-bar me-2"></i>إحصائيات النظام
+                    </h3>
+                    <div class="row" id="statsPanel">
+                        <!-- سيتم ملؤها بالجافاسكريبت -->
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <p>اختر صيغة التصدير:</p>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-primary" onclick="exportAsJSON()">
-                            <i class="fas fa-file-code me-2"></i>JSON
-                        </button>
-                        <button class="btn btn-outline-success" onclick="exportAsCSV()">
-                            <i class="fas fa-file-csv me-2"></i>CSV
-                        </button>
-                        <button class="btn btn-outline-warning" onclick="exportAsPDF()">
-                            <i class="fas fa-file-pdf me-2"></i>PDF
-                        </button>
+            </div>
+        </div>
+
+        <!-- التعليمات -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="cyber-panel">
+                    <h3 class="cyber-title">
+                        <i class="fas fa-info-circle me-2"></i>معلومات النظام
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-dark border-info">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-lock fa-3x mb-3 text-info"></i>
+                                    <h5>أمني كامل</h5>
+                                    <p class="small">التشفير AES-256، حماية متقدمة من الاختراق</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-dark border-success">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-bolt fa-3x mb-3 text-success"></i>
+                                    <h5>سرعة فائقة</h5>
+                                    <p class="small">نتائج فورية، تحديث حي للمواقع</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-dark border-warning">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-headset fa-3x mb-3 text-warning"></i>
+                                    <h5>دعم فني</h5>
+                                    <p class="small">متاح 24/7 عبر واتساب: 967733393303</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- تنبيه أمني -->
+                    <div class="alert alert-dark border-danger mt-3">
+                        <h6><i class="fas fa-exclamation-triangle me-2 text-danger"></i>تنبيه أمني:</h6>
+                        <p class="mb-0">
+                            هذا النظام مخصص للاستخدامات القانونية والأمنية فقط. أي استخدام غير مصرح به يعرضك للمساءلة القانونية.
+                            <br>للبلاغات الأمنية: 967733393303
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- نموذج سجل المواقع -->
-    <div class="modal fade" id="historyModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">سجل مواقع الهاتف</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="historyContent">
-                        <p>جاري تحميل السجل...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- تذييل الصفحة -->
-    <footer class="text-center text-white py-4 mt-5">
-        <p class="mb-0">© 2026 نظام تتبع الجوال - جميع الحقوق محفوظة لـ سبتان علي صفر.</p>
-        <p class="mb-0"><small>هذا المشروع بجهد ذاتي وحق خاص من اراد شراء عليه تواصل بي 967733393303<small></p>
+    <!-- الفوتر -->
+    <footer class="text-center py-4 mt-4 border-top border-info">
+        <p class="mb-1">© 2026 نظام التتبع الأمني - غرفة التحكم السيبرانية</p>
+        <p class="mb-0 text-muted small">
+            <i class="fas fa-code me-1"></i>تم التطوير بواسطة: سبتان علي صفر |
+            <i class="fas fa-phone me-1 ms-3"></i>للشراء والدعم: 967733393303
+        </p>
+        <p class="mt-2">
+            <span class="badge bg-danger">CYBER-SECURITY LEVEL: MAXIMUM</span>
+            <span class="badge bg-info ms-2">ENCRYPTION: AES-256-GCM</span>
+            <span class="badge bg-success ms-2">SYSTEM STATUS: OPERATIONAL</span>
+        </p>
     </footer>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // حالات التطبيق
         let currentPhone = '';
-        let currentData = null;
-        let isLoggedIn = false;
+        let terminalLines = [];
 
-        // عرض/إخفاء نافذة تسجيل الدخول
-        function showLogin() {
-            document.getElementById('loginModal').style.display = 'flex';
-        }
-
-        function hideLogin() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
-
-        // إعداد رقم هاتف في حقل البحث
         function setPhone(phone) {
             document.getElementById('phoneNumber').value = phone;
+            searchPhone();
         }
 
-        // تسجيل الدخول
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            try {
-                const response = await fetch('/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'username': username,
-                        'password': password
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    isLoggedIn = true;
-                    document.getElementById('loginLink').innerHTML = 
-                        `<i class="fas fa-user me-1"></i>${username}`;
-                    hideLogin();
-                    alert('تم تسجيل الدخول بنجاح!');
-                } else {
-                    alert('خطأ في تسجيل الدخول: ' + data.message);
-                }
-            } catch (error) {
-                alert('خطأ في الاتصال بالخادم');
-                console.error(error);
-            }
-        });
+        function addTerminalLine(text) {
+            const terminal = document.getElementById('terminalOutput');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+            line.textContent = '> ' + text;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
 
-        // البحث عن رقم الهاتف
         async function searchPhone() {
             const phoneInput = document.getElementById('phoneNumber').value.trim();
             
-            if (!phoneInput) {
-                alert('يرجى إدخال رقم الهاتف');
-                return;
-            }
-            
-            // التحقق من تسجيل الدخول
-            if (!isLoggedIn) {
-                alert('يجب تسجيل الدخول أولاً ولتسجيل الدخول الرجاء التواصل بدعم الفني 967733393303');
-                showLogin();
-                return;
-            }
-            
-            // التحقق من صحة رقم الهاتف
-            const phoneRegex = /^(0)?(73|77|78|70|71)[0-9]{7}$/;
-            if (!phoneRegex.test(phoneInput)) {
-                alert('يرجى إدخال رقم هاتف يمني صحيح (9 أرقام، يبدأ بـ 7)');
+            if (!phoneInput || phoneInput.length !== 9) {
+                alert('يرجى إدخال رقم هاتف صحيح مكون من 9 أرقام');
                 return;
             }
             
             currentPhone = phoneInput;
             
-            // عرض حالة التحميل
+            // إظهار التحميل
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('resultCard').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+            
+            // تنظيف التيرمينال
+            document.getElementById('terminalOutput').innerHTML = '';
+            
+            // إضافة رسائل التيرمينال
+            setTimeout(() => addTerminalLine(`تهيئة النظام الأمني للرقم: ${phoneInput}`), 100);
+            setTimeout(() => addTerminalLine('الاتصال بقواعد البيانات العالمية...'), 300);
+            setTimeout(() => addTerminalLine('فحص الرقم عبر Numverify API...'), 600);
+            setTimeout(() => addTerminalLine('تحديد الشركة المقدمة للخدمة...'), 900);
+            setTimeout(() => addTerminalLine('تثليث الموقع عبر الأبراج...'), 1200);
+            setTimeout(() => addTerminalLine('إنشاء خريطة التتبع...'), 1500);
             
             try {
-                const response = await fetch('/search', {
+                const response = await fetch('/api/search', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -558,183 +501,255 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    currentData = data;
-                    displayResults(data);
+                    setTimeout(() => {
+                        addTerminalLine('✓ تم تحديد الموقع بنجاح!');
+                        displayResults(data);
+                        loadStats();
+                    }, 1800);
                 } else {
-                    alert('خطأ: ' + data.message);
+                    setTimeout(() => {
+                        addTerminalLine('✗ فشل في تحديد الموقع');
+                        alert(data.message || 'حدث خطأ في البحث');
+                        document.getElementById('loading').style.display = 'none';
+                    }, 1800);
                 }
             } catch (error) {
-                alert('خطأ في الاتصال بالخادم');
+                setTimeout(() => {
+                    addTerminalLine('✗ خطأ في الاتصال بالخادم');
+                    alert('خطأ في الاتصال بالخادم');
+                    document.getElementById('loading').style.display = 'none';
+                }, 1800);
                 console.error(error);
-            } finally {
-                document.getElementById('loading').style.display = 'none';
             }
         }
 
-        // عرض النتائج
         function displayResults(data) {
-            // تحديث معلومات الهاتف
-            document.getElementById('resultPhone').textContent = data.phone_number;
-            document.getElementById('carrierBadge').textContent = data.carrier;
-            document.getElementById('carrierBadge').className = `carrier-badge ${data.carrier.toLowerCase().replace(' ', '-')}`;
-            document.getElementById('lastSeen').textContent = new Date(data.last_seen).toLocaleString('ar-YE');
-            document.getElementById('networkType').textContent = data.network_type;
-            document.getElementById('batteryLevel').textContent = data.battery_level;
-            document.getElementById('deviceStatus').textContent = data.status === 'active' ? 'متصل' : 'غير متصل';
+            // إخفاء التحميل وإظهار النتائج
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
             
-            // تحديث الموقع
-            document.getElementById('locationDetails').innerHTML = `
-                <strong>العنوان:</strong> ${data.location.address}<br>
-                <strong>الإحداثيات:</strong> ${data.location.lat.toFixed(6)}, ${data.location.lon.toFixed(6)}
+            // معلومات الرقم
+            document.getElementById('phoneInfo').innerHTML = `
+                <table class="table table-dark table-borderless">
+                    <tr>
+                        <th>الرقم:</th>
+                        <td class="text-info">${data.phone_number}</td>
+                    </tr>
+                    <tr>
+                        <th>الشركة:</th>
+                        <td><span class="badge bg-primary">${data.carrier}</span></td>
+                    </tr>
+                    <tr>
+                        <th>الدولة:</th>
+                        <td>${data.country}</td>
+                    </tr>
+                    <tr>
+                        <th>نوع الخط:</th>
+                        <td>${data.line_type}</td>
+                    </tr>
+                    <tr>
+                        <th>التحقق:</th>
+                        <td>
+                            ${data.numverify_valid ? 
+                                '<span class="badge bg-success">✓ صحيح</span>' : 
+                                '<span class="badge bg-warning">✗ غير متحقق</span>'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>IMEI:</th>
+                        <td class="text-muted">${data.device_info.imei}</td>
+                    </tr>
+                    <tr>
+                        <th>الحالة:</th>
+                        <td>
+                            <span class="badge ${data.device_info.status === 'online' ? 'bg-success' : 'bg-danger'}">
+                                ${data.device_info.status === 'online' ? 'متصل' : 'غير متصل'}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
             `;
-            document.getElementById('accuracy').textContent = `${data.accuracy_meters} متر`;
             
-            // عرض الخريطة
+            // معلومات الموقع
+            document.getElementById('locationInfo').innerHTML = `
+                <table class="table table-dark table-borderless">
+                    <tr>
+                        <th>العنوان:</th>
+                        <td>${data.location.address}</td>
+                    </tr>
+                    <tr>
+                        <th>الإحداثيات:</th>
+                        <td class="text-warning">
+                            ${data.location.lat.toFixed(6)}, ${data.location.lon.toFixed(6)}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>الدقة:</th>
+                        <td>${data.location.accuracy} متر</td>
+                    </tr>
+                    <tr>
+                        <th>معلومات الشخص:</th>
+                        <td>
+                            <span class="text-info">${data.person_info.name}</span>
+                            <br>
+                            <span class="badge threat-${data.person_info.threat_level}">
+                                ${getThreatLevelText(data.person_info.threat_level)}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>درجة الخطورة:</th>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-danger" 
+                                     style="width: ${data.person_info.risk_score}%">
+                                    ${data.person_info.risk_score}%
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            `;
+            
+            // الخريطة
             if (data.map_image) {
                 document.getElementById('mapImage').src = `data:image/png;base64,${data.map_image}`;
             }
             
-            // عرض الأبراج
+            // الأبراج
             let towersHTML = '';
-            data.towers.forEach((tower, index) => {
-                const signalPercent = Math.min(100, Math.max(0, tower.signal_percentage));
+            data.towers.forEach(tower => {
+                const percent = Math.round(tower.signal_percentage);
                 towersHTML += `
-                    <div class="card mb-2">
+                    <div class="card bg-dark mb-2 border-secondary">
                         <div class="card-body p-3">
-                            <div class="d-flex justify-content-between">
+                            <div class="d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="mb-1">${tower.name}</h6>
-                                    <small class="text-muted">${tower.carrier}</small>
+                                    <small class="text-muted">${tower.carrier} • ${tower.distance_km} كم</small>
                                 </div>
                                 <div class="text-end">
-                                    <div class="mb-1">${tower.distance_km} كم</div>
-                                    <div class="signal-bar" style="width: 100px;">
-                                        <div class="signal-indicator" style="left: ${signalPercent}%;"></div>
+                                    <div class="signal-bar mb-2" style="width: 120px;">
+                                        <div class="signal-indicator" style="left: ${percent}%;"></div>
                                     </div>
-                                    <small>${tower.signal_strength.toFixed(1)} dBm</small>
+                                    <small>${tower.signal_strength} dBm</small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 `;
             });
-            document.getElementById('towersList').innerHTML = towersHTML;
+            document.getElementById('towersInfo').innerHTML = towersHTML;
             
-            // عرض بطاقة النتائج
-            document.getElementById('resultCard').style.display = 'block';
+            // تقرير التهديد
+            let reportHTML = `
+                <div class="alert alert-dark border-${data.report.level === 'high' ? 'danger' : data.report.level === 'medium' ? 'warning' : 'success'}">
+                    <h6>مستوى التهديد: 
+                        <span class="threat-${data.report.level}">
+                            ${getThreatLevelText(data.report.level).toUpperCase()}
+                        </span>
+                    </h6>
+                </div>
+                <ul class="list-group list-group-dark">
+            `;
             
-            // التمرير إلى النتائج
-            document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // تحديث الموقع
-        function refreshLocation() {
-            if (currentPhone) {
-                searchPhone();
+            data.report.messages.forEach(msg => {
+                reportHTML += `<li class="list-group-item bg-dark border-secondary">${msg}</li>`;
+            });
+            
+            reportHTML += `</ul>`;
+            
+            if (data.report.recommendations) {
+                reportHTML += `
+                    <div class="mt-3">
+                        <h6><i class="fas fa-lightbulb me-2"></i>التوصيات:</h6>
+                        <ul class="list-group list-group-dark">
+                `;
+                
+                data.report.recommendations.forEach(rec => {
+                    reportHTML += `<li class="list-group-item bg-dark border-info small">${rec}</li>`;
+                });
+                
+                reportHTML += `</ul></div>`;
             }
+            
+            document.getElementById('threatReport').innerHTML = reportHTML;
+            
+            // التمرير للنتائج
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // تصدير البيانات
-        function exportData() {
-            const modal = new bootstrap.Modal(document.getElementById('exportModal'));
-            modal.show();
+        function getThreatLevelText(level) {
+            const levels = {
+                'low': 'منخفض',
+                'medium': 'متوسط',
+                'high': 'مرتفع'
+            };
+            return levels[level] || 'غير معروف';
         }
 
-        function exportAsJSON() {
-            if (!currentData) return;
-            
-            const dataStr = JSON.stringify(currentData, null, 2);
-            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-            
-            const exportFileDefaultName = `phone_tracking_${currentPhone}_${new Date().toISOString().slice(0,9)}.json`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        }
-
-        function exportAsCSV() {
-            if (!currentData) return;
-            
-            let csvContent = "بيانات تتبع الهاتف\n\n";
-            csvContent += `رقم الهاتف,${currentData.phone_number}\n`;
-            csvContent += `الشركة,${currentData.carrier}\n`;
-            csvContent += `خط العرض,${currentData.location.lat}\n`;
-            csvContent += `خط الطول,${currentData.location.lon}\n`;
-            csvContent += `العنوان,${currentData.location.address}\n`;
-            csvContent += `الدقة,${currentData.accuracy_meters} متر\n`;
-            csvContent += `آخر ظهور,${currentData.last_seen}\n`;
-            csvContent += `نوع الشبكة,${currentData.network_type}\n`;
-            csvContent += `مستوى البطارية,${currentData.battery_level}\n`;
-            
-            const dataUri = 'data:text/csv;charset=utf-8,'+ encodeURIComponent(csvContent);
-            const exportFileDefaultName = `phone_tracking_${currentPhone}_${new Date().toISOString().slice(0,9)}.csv`;
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', exportFileDefaultName);
-            linkElement.click();
-        }
-
-        function exportAsPDF() {
-            alert('خاصية تصدير PDF قيد التطوير');
-        }
-
-        // عرض سجل المواقع
-        async function showHistory() {
-            if (!currentPhone) return;
-            
-            const modal = new bootstrap.Modal(document.getElementById('historyModal'));
-            modal.show();
-            
+        async function loadStats() {
             try {
-                const response = await fetch(`/api/phone_history/${currentPhone}`);
+                const response = await fetch('/api/stats');
                 const data = await response.json();
                 
                 if (data.success) {
-                    let historyHTML = '<table class="table table-striped"><thead><tr><th>الوقت</th><th>الإحداثيات</th><th>الدقة</th></tr></thead><tbody>';
-                    
-                    data.history.forEach(point => {
-                        historyHTML += `
-                            <tr>
-                                <td>${new Date(point.timestamp).toLocaleString('ar-YE')}</td>
-                                <td>${point.lat.toFixed(6)}, ${point.lon.toFixed(6)}</td>
-                                <td>${point.accuracy} متر</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    historyHTML += '</tbody></table>';
-                    document.getElementById('historyContent').innerHTML = historyHTML;
+                    document.getElementById('statsPanel').innerHTML = `
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card bg-dark border-info text-center">
+                                <div class="card-body">
+                                    <h3 class="text-info">${data.stats.total_searches}</h3>
+                                    <small>إجمالي عمليات البحث</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card bg-dark border-success text-center">
+                                <div class="card-body">
+                                    <h3 class="text-success">${data.stats.unique_numbers}</h3>
+                                    <small>أرقام متميزة</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card bg-dark border-warning text-center">
+                                <div class="card-body">
+                                    <h3 class="text-warning">${data.stats.today_searches}</h3>
+                                    <small>بحث اليوم</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card bg-dark border-danger text-center">
+                                <div class="card-body">
+                                    <h3 class="text-danger">${data.stats.system_status === 'operational' ? 'نشط' : 'معطل'}</h3>
+                                    <small>حالة النظام</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
                 }
             } catch (error) {
-                console.error(error);
-                document.getElementById('historyContent').innerHTML = '<p class="text-danger">خطأ في تحميل السجل</p>';
+                console.error('Error loading stats:', error);
             }
         }
 
-        // تسجيل الدخول تلقائياً عند التحميل (للتجربة)
-        window.onload = function() {
-            // محاكاة تسجيل الدخول تلقائياً للتجربة
-            isLoggedIn = true;
-            document.getElementById('loginLink').innerHTML = 
-                `<i class="fas fa-user me-1"></i>مستخدم تجريبي`;
-            
-            // إضافة مستمع لأزرار الأمثلة
-            document.querySelectorAll('.btn-outline-primary, .btn-outline-success, .btn-outline-warning, .btn-outline-info').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const phone = this.textContent.split(' ')[0];
-                    setPhone(phone);
-                });
-            });
-        };
+        function contactSupport() {
+            const message = encodeURIComponent('أحتاج إلى دعم فني بخصوص نظام التتبع الأمني');
+            const phone = '967733393303';
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+        }
 
-        // السماح بالبحث عند الضغط على Enter
-        document.getElementById('phoneNumber').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchPhone();
-            }
+        // تحميل الإحصائيات عند فتح الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            
+            // السماح بالبحث عند الضغط على Enter
+            document.getElementById('phoneNumber').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchPhone();
+                }
+            });
         });
     </script>
 </body>
