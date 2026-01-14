@@ -573,7 +573,6 @@ def quantum_triangulation(towers):
     weighted_lat = sum(p[0] * w for p, w in zip(points, weights)) / total_weight
     weighted_lon = sum(p[1] * w for p, w in zip(points, weights)) / total_weight
     
-    # تحسين باستخدام محاكاة الجسيمات
     lat = weighted_lat + random.uniform(-0.002, 0.002)
     lon = weighted_lon + random.uniform(-0.002, 0.002)
     
@@ -582,39 +581,32 @@ def quantum_triangulation(towers):
 def generate_cyber_security_map(actual_lat, actual_lon, est_lat, est_lon, towers, carrier, country, threat_level):
     """إنشاء خريطة أمن سيبراني"""
     try:
-        # إعداد الرسم المتقدم
         plt.style.use('dark_background')
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10))
         
-        # الخريطة الرئيسية
         threat_colors = {'high': '#ff0055', 'medium': '#ffaa00', 'low': '#00ff00'}
         main_color = threat_colors.get(threat_level, '#00ffff')
         
-        # رسم الأبراج
         for tower in towers[:6]:
             ax1.scatter(tower['coordinates']['lon'], tower['coordinates']['lat'],
                        c='#00ffff', s=300, marker='^', alpha=0.8,
                        edgecolors='white', linewidth=2)
             
-            # إضافة معلومات البرج
             ax1.annotate(f"📡 {tower['performance']['distance_km']}km\n{tower['technology']['type']}",
                         (tower['coordinates']['lon'], tower['coordinates']['lat']),
                         fontsize=8, ha='center', color='white',
                         bbox=dict(boxstyle='round,pad=0.3', facecolor='black', alpha=0.7))
         
-        # رسم الموقع الفعلي
         ax1.scatter(actual_lon, actual_lat,
                    c=main_color, s=500, marker='o',
                    label='Target', edgecolors='white', linewidth=3,
                    alpha=0.9, zorder=10)
         
-        # رسم الموقع المقدر
         ax1.scatter(est_lon, est_lat,
                    c='cyan', s=300, marker='X',
                    label='Estimated', edgecolors='white', linewidth=2,
                    alpha=0.8, zorder=9)
         
-        # إضافة دوائر التغطية
         for tower in towers[:3]:
             circle = plt.Circle((tower['coordinates']['lon'], tower['coordinates']['lat']),
                               tower['performance']['distance_km']/50,
