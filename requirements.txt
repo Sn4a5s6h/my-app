@@ -1,0 +1,5 @@
+python-telegram-bot==20.5
+wikipedia-api==0.5.8
+newspaper3k==0.2.8
+beautifulsoup4==4.12.2
+requests==2.31.0
