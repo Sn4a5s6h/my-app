@@ -1,6 +1,4 @@
 node_modules/
-node_modules/
-node_modules/
-*.swp
-*.swo
-*.swn
+.env
+sessions/
+database.sqlite
