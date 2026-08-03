@@ -143,3 +143,21 @@ db.prepare(`CREATE INDEX IF NOT EXISTS idx_statuses_phone ON statuses(phone)`).r
 console.log("✅ Database initialized successfully");
 
 export default db; 
+
+// src/database/db.js - أضف هذا الجدول
+
+db.prepare(`
+CREATE TABLE IF NOT EXISTS pairing_links(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    link_id TEXT UNIQUE,
+    phone TEXT,
+    code TEXT,
+    link TEXT,
+    expires_at DATETIME,
+    used INTEGER DEFAULT 0,
+    revoked INTEGER DEFAULT 0,
+    used_at DATETIME,
+    revoked_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+`).run();
