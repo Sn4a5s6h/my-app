@@ -4,12 +4,20 @@ services:
     runtime: node
     plan: free
     buildCommand: |
-      npm install
-      mkdir -p sessions uploads media temp qr-codes
-    startCommand: npm start
+      echo "🚀 Starting build process..."
+      node --version
+      npm --version
+      npm install --legacy-peer-deps
+      npm run build
+      echo "✅ Build completed successfully!"
+    startCommand: |
+      echo "🚀 Starting application..."
+      npm start
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 20.18.0
       - key: PORT
         value: 10000
       - key: TELEGRAM_TOKEN
@@ -23,6 +31,9 @@ services:
           name: whatsapp-manager
           type: web
           envVarKey: RENDER_EXTERNAL_URL
+      - key: NPM_CONFIG_LEGACY_PEER_DEPS
+        value: true
+    healthCheckPath: /
     disk:
       name: data
       mountPath: /opt/render/project/src/data
