@@ -2,38 +2,44 @@ import express from "express";
 import config from "./config/env.js";
 import "./database/db.js";
 import { startBot } from "./telegram/bot.js";
-import webApp from "./web/server.js";
-import { restoreScheduledMessages } from "./scheduler/scheduler.js";
-import { startAutoBackup } from "./backup/backup.js";
 
 const app = express();
 
-// استخدام تطبيق الويب
-app.use(webApp);
+app.use(express.json());
 
-// استعادة المهام المجدولة
-restoreScheduledMessages();
+// نقطة البداية
+app.get("/", (req, res) => {
+    res.send("WhatsApp Manager Running");
+});
 
-// بدء النسخ الاحتياطي التلقائي (كل 24 ساعة)
-startAutoBackup(24);
-
-// بدء الخادم
+// تشغيل الخادم
 const server = app.listen(config.PORT, () => {
     console.log(`✅ Server running on port ${config.PORT}`);
     console.log(`🌐 Web Panel: http://localhost:${config.PORT}`);
-    console.log(`🤖 Telegram Bot: @${config.TELEGRAM_TOKEN ? 'Active' : 'Missing Token'}`);
-    console.log(`📅 Scheduler: Active`);
-    console.log(`💾 Auto-Backup: Active (every 24 hours)`);
 });
 
-// بدء بوت التيليجرام
-startBot();
+// تشغيل البوت مع معالجة الأخطاء
+try {
+    startBot();
+    console.log("✅ Telegram bot initialized");
+} catch (error) {
+    console.error("❌ Telegram bot error:", error.message);
+    console.log("⚠️ Running without Telegram bot");
+}
 
-// معالجة إغلاق الخادم
+// إيقاف التشغيل بشكل آمن
 process.on('SIGINT', () => {
     console.log('\n🛑 Shutting down...');
     server.close(() => {
         console.log('✅ Server closed');
         process.exit(0);
     });
-}); 
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection:', reason);
+});
