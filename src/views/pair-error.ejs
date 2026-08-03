@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #075e54 0%, #128C7E 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #dc3545;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .error-message {
+            color: #666;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8d7da;
+            border-radius: 10px;
+            color: #721c24;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 40px;
+            background: #075e54;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background: #054a41;
+            transform: scale(1.02);
+        }
+        
+        .suggestions {
+            text-align: right;
+            margin: 20px 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .suggestions li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .suggestions li .emoji {
+            margin-left: 10px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="icon">⚠️</div>
+            <h1>خطأ في الاقتران</h1>
+            
+            <div class="error-message">
+                <%= error %>
+            </div>
+            
+            <ul class="suggestions">
+                <li>
+                    <span class="emoji">🔄</span>
+                    اطلب رابط اقتران جديد من البوت
+                </li>
+                <li>
+                    <span class="emoji">⏰</span>
+                    تأكد من أن الرابط لم ينته صلاحيته
+                </li>
+                <li>
+                    <span class="emoji">📱</span>
+                    تأكد من أن حساب واتساب نشط
+                </li>
+                <li>
+                    <span class="emoji">🔗</span>
+                    تأكد من صحة الرابط
+                </li>
+            </ul>
+            
+            <a href="/" class="btn">🏠 العودة للرئيسية</a>
+        </div>
+    </div>
+</body>
+</html>
