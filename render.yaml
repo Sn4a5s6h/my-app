@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: whatsapp-manager
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 3000
+
+      - key: TELEGRAM_TOKEN
+        sync: false
+
+      - key: ADMIN_TELEGRAM_ID
+        sync: false
+
+      - key: JWT_SECRET
+        sync: false
