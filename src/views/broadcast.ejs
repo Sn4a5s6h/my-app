@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            padding: 20px;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #075e54; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .btn {
+            padding: 12px 30px;
+            background: #075e54;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover { background: #054a41; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .success { color: #155724; background: #d4edda; }
+        .error { color: #721c24; background: #f8d7da; }
+        .nav { margin-bottom: 20px; }
+        .nav a { color: #075e54; text-decoration: none; font-weight: bold; }
+        .nav a:hover { text-decoration: underline; }
+        .numbers-hint {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #075e54;
+            border-radius: 10px;
+            transition: width 0.5s;
+            width: 0%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="/">🏠 العودة للرئيسية</a>
+        </div>
+        
+        <h1>📢 إرسال رسالة جماعية</h1>
+        
+        <div class="card">
+            <form id="broadcastForm" onsubmit="sendBroadcast(event)">
+                <div class="form-group">
+                    <label>من حساب:</label>
+                    <select id="phone" required>
+                        <option value="">اختر حساب...</option>
+                        <% accounts.forEach(acc => { %>
+                            <option value="<%= acc %>"><%= acc %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>الأرقام المستلمة:</label>
+                    <input type="text" id="numbers" placeholder="مثال: 966511111111,966522222222,966533333333" required>
+                    <div class="numbers-hint">💡 افصل الأرقام بفاصلة (,) بدون مسافات</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>الرسالة:</label>
+                    <textarea id="message" placeholder="اكتب رسالتك هنا..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn">🚀 إرسال للجميع</button>
+            </form>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="progressText" style="margin-top: 10px; text-align: center;"></p>
+            </div>
+            
+            <div id="result" style="display: none;"></div>
+        </div>
+        
+        <div class="card">
+            <h3>💡 نصائح للإرسال الجماعي</h3>
+            <ul style="line-height: 2;">
+                <li>✅ لا ترسل أكثر من 50 رسالة في الدقيقة لتجنب الحظر</li>
+                <li>✅ استخدم تأخير بين الرسائل (يتم تلقائياً)</li>
+                <li>✅ تأكد من إضافة كود الدولة (مثل 966 للسعودية)</li>
+                <li>✅ يمكنك إضافة ميديا في النسخة القادمة</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        async function sendBroadcast(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('phone').value;
+            const numbers = document.getElementById('numbers').value;
+            const message = document.getElementById('message').value;
+            
+            if (!phone || !numbers || !message) {
+                alert('الرجاء ملء جميع الحقول');
+                return;
+            }
+            
+            const numberList = numbers.split(',').map(n => n.trim());
+            if (numberList.length > 100) {
+                if (!confirm(`⚠️ أنت ترسل إلى ${numberList.length} شخص. هل أنت متأكد؟`)) {
+                    return;
+                }
+            }
+            
+            // إظهار التقدم
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('progressFill').style.width = '10%';
+            document.getElementById('progressText').textContent = '⏳ جاري الإرسال...';
+            
+            try {
+                const response = await fetch('/api/broadcast', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, numbers, message })
+                });
+                
+                document.getElementById('progressFill').style.width = '100%';
+                document.getElementById('progressText').textContent = '✅ تم الانتهاء!';
+                
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                
+                let html = `<div class="result ${data.failed === 0 ? 'success' : 'error'}">`;
+                html += `<h3>📊 نتائج الإرسال:</h3>`;
+                html += `<p>✅ نجح: ${data.success}</p>`;
+                html += `<p>❌ فشل: ${data.failed}</p>`;
+                html += `<p>📝 المجموع: ${data.total}</p>`;
+                
+                if (data.results && data.results.length > 0) {
+                    html += `<hr><h4>التفاصيل:</h4>`;
+                    const results = data.results.slice(0, 10);
+                    for (const r of results) {
+                        html += `<p>${r.success ? '✅' : '❌'} ${r.number} ${r.error ? '- ' + r.error : ''}</p>`;
+                    }
+                    if (data.results.length > 10) {
+                        html += `<p>... و ${data.results.length - 10} أخرى</p>`;
+                    }
+                }
+                html += `</div>`;
+                
+                resultDiv.innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('progressFill').style.width = '100%';
+                document.getElementById('progressText').textContent = '❌ حدث خطأ';
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').innerHTML = `
+                    <div class="result error">
+                        ❌ خطأ: ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
