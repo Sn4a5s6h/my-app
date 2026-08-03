@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #075e54 0%, #128C7E 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #075e54;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .info-box {
+            background: #f0f2f5;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .info-box .label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .info-box .value {
+            color: #075e54;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .code-display {
+            background: #075e54;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        
+        .timer {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 40px;
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background: #128C7E;
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(37, 211, 102, 0.4);
+        }
+        
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: #075e54;
+        }
+        
+        .btn-secondary:hover {
+            background: #054a41;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .status.success {
+            display: block;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            display: block;
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.loading {
+            display: block;
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #075e54;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .steps {
+            text-align: right;
+            margin: 20px 0;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .steps li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .steps li .step-num {
+            background: #075e54;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #25D366;
+            border-radius: 2px;
+            transition: width 1s linear;
+            width: 0%;
+        }
+        
+        @media (max-width: 480px) {
+            .card { padding: 25px; }
+            .code-display { font-size: 24px; letter-spacing: 5px; }
+            h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">🔗</div>
+            <h1>اقتران واتساب</h1>
+            <p class="subtitle">اربط حسابك بسهولة وسرعة</p>
+            
+            <div class="info-box">
+                <div class="label">📱 رقم الهاتف</div>
+                <div class="value"><%= phone %></div>
+            </div>
+            
+            <div class="info-box">
+                <div class="label">🔑 كود الاقتران</div>
+                <div class="code-display"><%= code %></div>
+            </div>
+            
+            <div class="timer" id="timer">
+                ⏳ يتبقى <span id="remainingTime"><%= remainingTime %></span> ثانية
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <ol class="steps">
+                <li>
+                    <span class="step-num">1</span>
+                    افتح تطبيق واتساب
+                </li>
+                <li>
+                    <span class="step-num">2</span>
+                    اذهب إلى الإعدادات > الأجهزة المرتبطة
+                </li>
+                <li>
+                    <span class="step-num">3</span>
+                    اضغط على "ربط جهاز" وأدخل الكود
+                </li>
+            </ol>
+            
+            <button class="btn" id="pairBtn" onclick="startPairing()">
+                🔗 بدء الاقتران
+            </button>
+            
+            <div class="status" id="status"></div>
+            
+            <button class="btn btn-secondary" style="margin-top: 10px;" onclick="window.location.href='/'">
+                🏠 العودة للرئيسية
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        let timerInterval;
+        let remaining = <%= remainingTime %>;
+        let isPairing = false;
+        
+        // تحديث المؤقت
+        function updateTimer() {
+            const timerElement = document.getElementById('remainingTime');
+            const progressFill = document.getElementById('progressFill');
+            
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('pairBtn').disabled = true;
+                document.getElementById('pairBtn').textContent = '⏰ انتهت الصلاحية';
+                showStatus('انتهت صلاحية الرابط، يرجى طلب رابط جديد', 'error');
+                return;
+            }
+            
+            timerElement.textContent = remaining;
+            const progress = (remaining / <%= remainingTime %>) * 100;
+            progressFill.style.width = progress + '%';
+            remaining--;
+        }
+        
+        // بدء المؤقت
+        timerInterval = setInterval(updateTimer, 1000);
+        updateTimer();
+        
+        // عرض الحالة
+        function showStatus(message, type = 'loading') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'status ' + type;
+            statusDiv.innerHTML = message;
+            statusDiv.style.display = 'block';
+        }
+        
+        // بدء الاقتران
+        async function startPairing() {
+            if (isPairing) return;
+            if (remaining <= 0) {
+                showStatus('انتهت صلاحية الرابط', 'error');
+                return;
+            }
+            
+            isPairing = true;
+            const btn = document.getElementById('pairBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ جاري الاقتران...';
+            
+            showStatus('⏳ جاري الاتصال بخادم الاقتران...', 'loading');
+            
+            try {
+                const linkId = window.location.pathname.split('/').pop();
+                const response = await fetch(`/api/pair/${linkId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus(`
+                        ✅ ${data.message}
+                        <br>
+                        📱 الحساب: ${data.phone}
+                        <br>
+                        🔑 الكود: ${data.code}
+                        <br>
+                        <br>
+                        <strong>تم الاقتران بنجاح! يمكنك الآن استخدام التطبيق.</strong>
+                    `, 'success');
+                    
+                    btn.textContent = '✅ تم الاقتران';
+                    
+                    // إعادة التوجيه بعد 3 ثواني
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                    
+                } else {
+                    showStatus(`❌ ${data.error}`, 'error');
+                    btn.disabled = false;
+                    btn.textContent = '🔄 المحاولة مرة أخرى';
+                    isPairing = false;
+                }
+                
+            } catch (error) {
+                showStatus(`❌ خطأ في الاتصال: ${error.message}`, 'error');
+                btn.disabled = false;
+                btn.textContent = '🔄 المحاولة مرة أخرى';
+                isPairing = false;
+            }
+        }
+    </script>
+</body>
+</html>
