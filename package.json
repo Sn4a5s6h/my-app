@@ -13,6 +13,7 @@
     "ejs": "latest",
     "express": "latest",
     "multer": "latest",
+    "node-schedule": "latest",
     "pino": "latest",
     "socket.io": "latest",
     "telegraf": "latest"
