@@ -1,24 +1,82 @@
 {
   "name": "whatsapp-manager",
   "version": "3.0.0",
+  "description": "نظام متقدم لإدارة حسابات واتساب مع بوت تيليجرام وواجهة ويب",
   "type": "module",
+  "main": "src/app.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "build": "mkdir -p sessions uploads media temp qr-codes data",
+    "postinstall": "npm rebuild better-sqlite3 || true",
+    "test": "node --test",
+    "lint": "eslint src/**/*.js",
+    "format": "prettier --write src/**/*.js",
+    "clean": "rm -rf sessions/* uploads/* media/* temp/* qr-codes/* data/*.sqlite*",
+    "backup": "cp data/database.sqlite data/backup-$(date +%Y%m%d-%H%M%S).sqlite",
+    "pm2:start": "pm2 start src/app.js --name whatsapp-manager",
+    "pm2:stop": "pm2 stop whatsapp-manager",
+    "pm2:restart": "pm2 restart whatsapp-manager",
+    "pm2:logs": "pm2 logs whatsapp-manager"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "latest",
-    "better-sqlite3": "latest",
-    "dotenv": "latest",
-    "ejs": "latest",
-    "express": "latest",
-    "multer": "latest",
-    "node-cron": "latest",
-    "pino": "latest",
-    "socket.io": "latest",
-    "telegraf": "latest"
+    "@whiskeysockets/baileys": "6.7.9",
+    "better-sqlite3": "11.5.0",
+    "compression": "1.7.4",
+    "cors": "2.8.5",
+    "dotenv": "16.4.5",
+    "ejs": "3.1.10",
+    "express": "4.21.1",
+    "express-rate-limit": "7.4.1",
+    "helmet": "7.1.0",
+    "multer": "1.4.5-lts.1",
+    "pino": "9.5.0",
+    "pino-pretty": "11.2.2",
+    "qrcode": "1.5.4",
+    "socket.io": "4.8.1",
+    "telegraf": "4.16.3"
   },
   "devDependencies": {
-    "nodemon": "latest"
-  }
+    "nodemon": "3.1.7",
+    "eslint": "9.15.0",
+    "prettier": "3.3.3",
+    "@eslint/js": "9.15.0",
+    "globals": "15.12.0"
+  },
+  "optionalDependencies": {
+    "sharp": "0.33.5",
+    "bufferutil": "4.0.8",
+    "utf-8-validate": "6.0.4"
+  },
+  "peerDependencies": {
+    "pm2": "5.4.2"
+  },
+  "peerDependenciesMeta": {
+    "pm2": {
+      "optional": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/whatsapp-manager.git"
+  },
+  "keywords": [
+    "whatsapp",
+    "whatsapp-bot",
+    "telegram-bot",
+    "whatsapp-manager",
+    "baileys",
+    "multi-device",
+    "whatsapp-api"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/whatsapp-manager/issues"
+  },
+  "homepage": "https://github.com/yourusername/whatsapp-manager#readme"
 }
