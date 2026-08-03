@@ -1,6 +1,6 @@
 {
   "name": "whatsapp-manager",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
     "start": "node src/app.js",
@@ -13,7 +13,7 @@
     "ejs": "latest",
     "express": "latest",
     "multer": "latest",
-    "node-schedule": "latest",
+    "node-cron": "latest",
     "pino": "latest",
     "socket.io": "latest",
     "telegraf": "latest"
