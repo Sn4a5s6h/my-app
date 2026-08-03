@@ -1,200 +1,314 @@
-// إضافة الأوامر الجديدة في دالة startBot
+import { Telegraf } from "telegraf";
+import config from "../config/env.js";
+import { 
+    addAccount, 
+    accounts, 
+    getQR, 
+    getAccountStatus,
+    disconnectAccount,
+    sendBroadcast,
+    sendStatus,
+    viewAllStatuses,
+    getStatusViews
+} from "../whatsapp/manager.js";
 
-// ====== جدولة رسالة ======
-bot.command("schedule", async ctx => {
-    const args = ctx.message.text.split(" ");
-    // schedule [phone] [type] [recipient] [datetime] [message]
-    // مثال: schedule 966512345678 single 966511111111 2024-01-01T10:00 مرحبا
-    
-    if (args.length < 6) {
-        return ctx.reply(
-            "❌ استخدام: /schedule [رقم حسابك] [نوع: single/broadcast/status] [مستلم/أرقام] [التاريخ] [الرسالة]\n" +
-            "مثال: /schedule 966512345678 single 966511111111 2024-01-01T10:00 مرحبا"
-        );
-    }
-    
-    const phone = args[1];
-    const type = args[2];
-    const recipient = args[3];
-    const datetime = args[4];
-    const message = args.slice(5).join(" ");
-    
+let bot = null;
+
+// ✅ تصدير الدالة مباشرة
+export function startBot() {
     try {
-        const { addScheduledTask } = await import('../scheduler/scheduler.js');
-        const taskId = addScheduledTask({
-            phone,
-            type,
-            recipient,
-            message,
-            scheduled_at: datetime
+        if (!config.TELEGRAM_TOKEN) {
+            console.error("❌ TELEGRAM_TOKEN not set in .env");
+            return null;
+        }
+
+        bot = new Telegraf(config.TELEGRAM_TOKEN);
+
+        // ====== أمر البداية ======
+        bot.start(ctx => {
+            ctx.reply(
+                "🤖 WhatsApp Manager Online\n\n" +
+                "📱 الأوامر المتاحة:\n" +
+                "/start - عرض هذه الرسالة\n" +
+                "/add_phone [رقم] - إضافة حساب جديد\n" +
+                "/add_pairing [رقم] [كود] - إضافة حساب بكود الاقتران\n" +
+                "/accounts - عرض الحسابات\n" +
+                "/status [رقم] - حالة حساب\n" +
+                "/send [رقم] [رسالة] - إرسال رسالة\n" +
+                "/broadcast [رقم] [أرقام] [رسالة] - إرسال رسالة جماعية\n" +
+                "/status_send [رقم] [رسالة] - نشر حالة\n" +
+                "/status_view [رقم] - مشاهدة جميع الحالات\n" +
+                "/disconnect [رقم] - قطع الاتصال\n" +
+                "/help - عرض المساعدة"
+            );
         });
-        
-        await ctx.reply(`✅ تم جدولة الرسالة\n🆔 معرف المهمة: ${taskId}\n📅 التاريخ: ${datetime}`);
-    } catch (error) {
-        await ctx.reply(`❌ فشل الجدولة: ${error.message}`);
-    }
-});
 
-// ====== عرض المهام المجدولة ======
-bot.command("scheduled", async ctx => {
-    try {
-        const { getScheduledTasks } = await import('../scheduler/scheduler.js');
-        const tasks = getScheduledTasks('pending');
-        
-        if (tasks.length === 0) {
-            return ctx.reply("📭 لا توجد مهام مجدولة");
-        }
-        
-        let reply = "⏰ المهام المجدولة:\n\n";
-        for (const task of tasks.slice(0, 10)) {
-            reply += `🆔 #${task.id}\n`;
-            reply += `📱 ${task.phone}\n`;
-            reply += `📝 ${task.message.substring(0, 30)}...\n`;
-            reply += `📅 ${new Date(task.scheduled_at).toLocaleString()}\n\n`;
-        }
-        if (tasks.length > 10) {
-            reply += `... و ${tasks.length - 10} أخرى`;
-        }
-        
-        await ctx.reply(reply);
-    } catch (error) {
-        await ctx.reply(`❌ خطأ: ${error.message}`);
-    }
-});
+        // ====== أمر المساعدة ======
+        bot.command("help", ctx => {
+            ctx.reply(
+                "📖 الأوامر المتاحة:\n\n" +
+                "🔹 /add_phone 966512345678 - إضافة حساب باستخدام QR\n" +
+                "🔹 /add_pairing 966512345678 123456 - إضافة حساب بكود الاقتران\n" +
+                "🔹 /accounts - عرض جميع الحسابات\n" +
+                "🔹 /status 966512345678 - حالة حساب معين\n" +
+                "🔹 /send 966512345678 نص الرسالة - إرسال رسالة\n" +
+                "🔹 /broadcast 966512345678 أرقام مفصولة بفاصلة نص الرسالة\n" +
+                "🔹 /status_send 966512345678 نص الحالة - نشر حالة\n" +
+                "🔹 /status_view 966512345678 - مشاهدة كل الحالات\n" +
+                "🔹 /disconnect 966512345678 - قطع الاتصال\n" +
+                "🔹 /help - عرض هذه المساعدة"
+            );
+        });
 
-// ====== إلغاء مهمة مجدولة ======
-bot.command("cancel_schedule", async ctx => {
-    const taskId = ctx.message.text.split(" ")[1];
-    
-    if (!taskId) {
-        return ctx.reply("❌ يرجى كتابة معرف المهمة\nمثال: /cancel_schedule 5");
-    }
-    
-    try {
-        const { cancelScheduledTask } = await import('../scheduler/scheduler.js');
-        cancelScheduledTask(parseInt(taskId));
-        await ctx.reply(`✅ تم إلغاء المهمة #${taskId}`);
-    } catch (error) {
-        await ctx.reply(`❌ فشل الإلغاء: ${error.message}`);
-    }
-});
+        // ====== إضافة حساب بـ QR ======
+        bot.command("add_phone", async ctx => {
+            const phone = ctx.message.text.split(" ")[1];
+            
+            if (!phone) {
+                return ctx.reply("❌ يرجى كتابة رقم الهاتف\nمثال: /add_phone 966512345678");
+            }
 
-// ====== إضافة قاعدة رد تلقائي ======
-bot.command("add_reply", async ctx => {
-    const args = ctx.message.text.split(" ");
-    // add_reply [phone] [trigger] [reply]
-    // مثال: add_reply 966512345678 مرحبا أهلا بك
-    
-    if (args.length < 4) {
-        return ctx.reply(
-            "❌ استخدام: /add_reply [رقم حسابك] [كلمة محفزة] [الرد]\n" +
-            "مثال: /add_reply 966512345678 مرحبا أهلا بك"
-        );
-    }
-    
-    const phone = args[1];
-    const trigger = args[2];
-    const reply = args.slice(3).join(" ");
-    
-    try {
-        const { addReplyRule } = await import('../auto-reply/rules.js');
-        const ruleId = addReplyRule({ phone, trigger, reply });
-        await ctx.reply(`✅ تم إضافة قاعدة رد جديدة\n🆔 معرف القاعدة: ${ruleId}\n🔹 الكلمة: ${trigger}\n🔸 الرد: ${reply}`);
-    } catch (error) {
-        await ctx.reply(`❌ فشل الإضافة: ${error.message}`);
-    }
-});
+            await ctx.reply(`⏳ جاري إعداد حساب ${phone}...`);
+            
+            try {
+                await addAccount(phone);
+                
+                setTimeout(async () => {
+                    const qr = getQR(phone);
+                    if (qr) {
+                        await ctx.replyWithPhoto(
+                            { source: Buffer.from(qr, 'base64') },
+                            { caption: `📸 QR Code للحساب ${phone}\nامسح الكود باستخدام واتساب` }
+                        );
+                    } else {
+                        await ctx.reply(`⚠️ لم يتم إنشاء QR بعد، انتظر قليلاً`);
+                    }
+                }, 3000);
+                
+            } catch (error) {
+                await ctx.reply(`❌ خطأ: ${error.message}`);
+            }
+        });
 
-// ====== عرض قواعد الردود ======
-bot.command("reply_rules", async ctx => {
-    const phone = ctx.message.text.split(" ")[1];
-    
-    try {
-        const { getReplyRules } = await import('../auto-reply/rules.js');
-        const rules = getReplyRules(phone);
-        
-        if (rules.length === 0) {
-            return ctx.reply("📭 لا توجد قواعد ردود");
-        }
-        
-        let reply = "🤖 قواعد الردود التلقائية:\n\n";
-        for (const rule of rules) {
-            reply += `🆔 #${rule.id}\n`;
-            reply += `🔹 الكلمة: ${rule.trigger}\n`;
-            reply += `🔸 الرد: ${rule.reply.substring(0, 30)}...\n`;
-            reply += `📱 حساب: ${rule.phone}\n\n`;
-        }
-        
-        await ctx.reply(reply);
-    } catch (error) {
-        await ctx.reply(`❌ خطأ: ${error.message}`);
-    }
-});
+        // ====== إضافة حساب بـ Pairing Code ======
+        bot.command("add_pairing", async ctx => {
+            const args = ctx.message.text.split(" ");
+            const phone = args[1];
+            const code = args[2];
+            
+            if (!phone) {
+                return ctx.reply("❌ يرجى كتابة رقم الهاتف\nمثال: /add_pairing 966512345678 123456");
+            }
 
-// ====== حذف قاعدة رد ======
-bot.command("delete_reply", async ctx => {
-    const ruleId = ctx.message.text.split(" ")[1];
-    
-    if (!ruleId) {
-        return ctx.reply("❌ يرجى كتابة معرف القاعدة\nمثال: /delete_reply 5");
-    }
-    
-    try {
-        const { deleteReplyRule } = await import('../auto-reply/rules.js');
-        deleteReplyRule(parseInt(ruleId));
-        await ctx.reply(`✅ تم حذف القاعدة #${ruleId}`);
-    } catch (error) {
-        await ctx.reply(`❌ فشل الحذف: ${error.message}`);
-    }
-});
+            if (!code) {
+                return ctx.reply("❌ يرجى كتابة كود الاقتران (6 أرقام)");
+            }
 
-// ====== إحصائيات ======
-bot.command("stats", async ctx => {
-    try {
-        const { getGeneralStats } = await import('../analytics/dashboard.js');
-        const stats = getGeneralStats();
-        
-        let reply = "📊 الإحصائيات العامة:\n\n";
-        reply += `📱 الحسابات الكلية: ${stats.totalAccounts}\n`;
-        reply += `🟢 المتصلة: ${stats.connectedAccounts}\n`;
-        reply += `💬 رسائل اليوم: ${stats.messagesToday}\n`;
-        reply += `📝 إجمالي الرسائل: ${stats.totalMessages}\n`;
-        reply += `📸 الحالات: ${stats.totalStatuses}\n`;
-        reply += `👥 المجموعات: ${stats.totalGroups}\n`;
-        reply += `⏰ مهام مجدولة: ${stats.scheduledPending}\n`;
-        reply += `🤖 ردود تلقائية: ${stats.totalAutoReplies}\n`;
-        
-        await ctx.reply(reply);
-    } catch (error) {
-        await ctx.reply(`❌ خطأ: ${error.message}`);
-    }
-});
+            await ctx.reply(`⏳ جاري الاقتران بالحساب ${phone}...`);
+            
+            try {
+                await addAccount(phone, code);
+                await ctx.reply(`✅ تم الاقتران بنجاح بالحساب ${phone}`);
+            } catch (error) {
+                await ctx.reply(`❌ فشل الاقتران: ${error.message}`);
+            }
+        });
 
-// ====== إحصائيات حساب معين ======
-bot.command("account_stats", async ctx => {
-    const phone = ctx.message.text.split(" ")[1];
-    
-    if (!phone) {
-        return ctx.reply("❌ يرجى كتابة رقم الهاتف\nمثال: /account_stats 966512345678");
-    }
-    
-    try {
-        const { getAccountPerformance } = await import('../analytics/dashboard.js');
-        const stats = getAccountPerformance(phone);
+        // ====== عرض الحسابات ======
+        bot.command("accounts", async ctx => {
+            const accs = accounts();
+            
+            if (accs.length === 0) {
+                return ctx.reply("📭 لا يوجد حسابات نشطة");
+            }
+
+            let message = "📱 الحسابات النشطة:\n\n";
+            for (const phone of accs) {
+                const status = getAccountStatus(phone);
+                const icon = status === "connected" ? "🟢" : status === "connecting" ? "🟡" : "🔴";
+                message += `${icon} ${phone} - ${status}\n`;
+            }
+            
+            await ctx.reply(message);
+        });
+
+        // ====== حالة حساب ======
+        bot.command("status", async ctx => {
+            const phone = ctx.message.text.split(" ")[1];
+            
+            if (!phone) {
+                return ctx.reply("❌ يرجى كتابة رقم الهاتف\nمثال: /status 966512345678");
+            }
+
+            const status = getAccountStatus(phone);
+            const exists = accounts().includes(phone);
+            
+            if (!exists) {
+                return ctx.reply(`❌ الحساب ${phone} غير موجود`);
+            }
+
+            const icon = status === "connected" ? "🟢" : status === "connecting" ? "🟡" : "🔴";
+            await ctx.reply(`${icon} حالة الحساب ${phone}: ${status}`);
+        });
+
+        // ====== إرسال رسالة ======
+        bot.command("send", async ctx => {
+            const parts = ctx.message.text.split(" ");
+            const phone = parts[1];
+            const message = parts.slice(2).join(" ");
+            
+            if (!phone || !message) {
+                return ctx.reply(
+                    "❌ استخدام: /send [رقم الهاتف] [الرسالة]\n" +
+                    "مثال: /send 966512345678 مرحبا كيف حالك؟"
+                );
+            }
+
+            try {
+                await ctx.reply(`⏳ جاري إرسال الرسالة إلى ${phone}...`);
+                const { sendMessage } = await import("../whatsapp/manager.js");
+                await sendMessage(phone, phone, message);
+                await ctx.reply(`✅ تم إرسال الرسالة إلى ${phone}`);
+            } catch (error) {
+                await ctx.reply(`❌ فشل الإرسال: ${error.message}`);
+            }
+        });
+
+        // ====== إرسال رسالة جماعية ======
+        bot.command("broadcast", async ctx => {
+            const args = ctx.message.text.split(" ");
+            const phone = args[1];
+            const numbersStr = args[2];
+            const message = args.slice(3).join(" ");
+            
+            if (!phone || !numbersStr || !message) {
+                return ctx.reply(
+                    "❌ استخدام: /broadcast [رقم حسابك] [أرقام مفصولة بفاصلة] [الرسالة]\n" +
+                    "مثال: /broadcast 966512345678 966511111111,966522222222,966533333333 مرحبا بالجميع"
+                );
+            }
+
+            const numbers = numbersStr.split(",").map(n => n.trim());
+            
+            await ctx.reply(`⏳ جاري إرسال رسالة جماعية إلى ${numbers.length} شخص...`);
+            
+            try {
+                const result = await sendBroadcast(phone, numbers, message);
+                
+                let reply = `📊 نتائج الإرسال الجماعي:\n`;
+                reply += `✅ نجح: ${result.success}\n`;
+                reply += `❌ فشل: ${result.failed}\n`;
+                reply += `📝 المجموع: ${result.total}\n\n`;
+                
+                const results = result.results.slice(0, 5);
+                for (const r of results) {
+                    reply += `${r.success ? '✅' : '❌'} ${r.number}\n`;
+                }
+                if (result.results.length > 5) {
+                    reply += `... و ${result.results.length - 5} أخرى`;
+                }
+                
+                await ctx.reply(reply);
+            } catch (error) {
+                await ctx.reply(`❌ فشل الإرسال الجماعي: ${error.message}`);
+            }
+        });
+
+        // ====== نشر حالة ======
+        bot.command("status_send", async ctx => {
+            const args = ctx.message.text.split(" ");
+            const phone = args[1];
+            const message = args.slice(2).join(" ");
+            
+            if (!phone || !message) {
+                return ctx.reply(
+                    "❌ استخدام: /status_send [رقم حسابك] [نص الحالة]\n" +
+                    "مثال: /status_send 966512345678 مرحبا بالعالم"
+                );
+            }
+
+            await ctx.reply(`⏳ جاري نشر الحالة...`);
+            
+            try {
+                const result = await sendStatus(phone, message);
+                await ctx.reply(`✅ ${result.message}\n🆔 ${result.statusId}`);
+            } catch (error) {
+                await ctx.reply(`❌ فشل نشر الحالة: ${error.message}`);
+            }
+        });
+
+        // ====== مشاهدة جميع الحالات ======
+        bot.command("status_view", async ctx => {
+            const phone = ctx.message.text.split(" ")[1];
+            
+            if (!phone) {
+                return ctx.reply("❌ يرجى كتابة رقم الهاتف\nمثال: /status_view 966512345678");
+            }
+
+            await ctx.reply(`⏳ جاري مشاهدة جميع الحالات...`);
+            
+            try {
+                const result = await viewAllStatuses(phone);
+                
+                let reply = `📊 نتائج مشاهدة الحالات:\n`;
+                reply += `✅ تمت المشاهدة: ${result.viewed}\n`;
+                reply += `📝 المجموع: ${result.total}\n\n`;
+                
+                const results = result.results.slice(0, 5);
+                for (const r of results) {
+                    reply += `${r.success ? '👁️' : '❌'} ${r.sender}\n`;
+                }
+                if (result.results.length > 5) {
+                    reply += `... و ${result.results.length - 5} أخرى`;
+                }
+                
+                await ctx.reply(reply);
+            } catch (error) {
+                await ctx.reply(`❌ فشل مشاهدة الحالات: ${error.message}`);
+            }
+        });
+
+        // ====== قطع الاتصال ======
+        bot.command("disconnect", async ctx => {
+            const phone = ctx.message.text.split(" ")[1];
+            
+            if (!phone) {
+                return ctx.reply("❌ يرجى كتابة رقم الهاتف\nمثال: /disconnect 966512345678");
+            }
+
+            try {
+                await ctx.reply(`⏳ جاري قطع الاتصال بالحساب ${phone}...`);
+                await disconnectAccount(phone);
+                await ctx.reply(`✅ تم قطع الاتصال بالحساب ${phone}`);
+            } catch (error) {
+                await ctx.reply(`❌ فشل قطع الاتصال: ${error.message}`);
+            }
+        });
+
+        // ====== معالجة الأخطاء ======
+        bot.catch((err, ctx) => {
+            console.error('❌ Bot error:', err);
+            ctx.reply('⚠️ حدث خطأ، يرجى المحاولة لاحقاً').catch(() => {});
+        });
+
+        // ====== إطلاق البوت ======
+        bot.launch()
+            .then(() => {
+                console.log("✅ Telegram bot started successfully");
+            })
+            .catch(err => {
+                console.error("❌ Failed to launch bot:", err);
+            });
         
-        let reply = `📊 إحصائيات الحساب ${phone}:\n\n`;
-        reply += `📤 مرسل: ${stats.total.sent}\n`;
-        reply += `📥 مستلم: ${stats.total.received}\n`;
-        reply += `📸 حالات: ${stats.total.statuses}\n`;
-        reply += `👥 مجموعات: ${stats.total.groups}\n`;
-        reply += `⏰ مهام مجدولة: ${stats.total.scheduled}\n`;
-        reply += `🤖 ردود تلقائية: ${stats.total.autoReplies}\n`;
-        reply += `📊 متوسط يومي: ${stats.averageDaily.sent} مرسل, ${stats.averageDaily.received} مستلم\n`;
-        reply += `🎯 نسبة الاستجابة: ${stats.responseRate}%\n`;
-        reply += `📅 أيام النشاط: ${stats.daysActive}\n`;
+        return bot;
         
-        await ctx.reply(reply);
     } catch (error) {
-        await ctx.reply(`❌ خطأ: ${error.message}`);
+        console.error("❌ Error in startBot:", error);
+        return null;
     }
-});
+}
+
+// ✅ تصدير getBot
+export function getBot() {
+    return bot;
+}
