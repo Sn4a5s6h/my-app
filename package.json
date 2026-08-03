@@ -1,0 +1,16 @@
+{
+  "name": "whatsapp-manager",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js"
+  },
+  "dependencies": {
+    "@whiskeysockets/baileys": "latest",
+    "better-sqlite3": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "socket.io": "latest",
+    "telegraf": "latest"
+  }
+}
